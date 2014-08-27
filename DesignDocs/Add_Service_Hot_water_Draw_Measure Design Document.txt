@@ -16,10 +16,10 @@ Tag		Service Water Heating.Water Use
 Description:
 This measure allows the user to create specify new WaterUseEquipment and WaterUseConnection objects to the current model. 
 Users can specify the required properties of the OSWaterUse:Equipment objects or specify the creation of objects adherent to the 
-BA Benchmark Home (for new construction). If desired, daily water usage and schedules from the BA Benchmark New Construction spreadsheet 
+BA House Simulation Protocols. If desired, daily water usage and schedules from the BA House Simulation Protocols 
 can be assigned to the water use objects. Alternatively, a schedule representing constant usage (which can be later modified) can be generated. 
 If an existing hot water loop is chosen, this measure will not alter any supply side equipment used hot water generation, but will only attach 
-objects to the demand side of the loop. If the user elects to create a new hot water loop, an 80% AFUE hot water heater representing typical 
+objects to the demand side of the loop. If the user elects to create a new hot water loop, an 0.59 EF water heater representing typical 
 performance will be created and configured. If desired, users will need to manually configure the supply equipment to adhere to BA Benchmark home 
 requirements.
 
@@ -54,7 +54,7 @@ Arguments:
 	
 3) number_Of_Bedrooms
 	Required:			Yes
-	Type: 				StringVector (1, 2, 3, 4, 5, 6 or more)
+	Type: 				StringVector (1, 2, 3, 4, 5)
 	Display Name: 		Number of Bedrooms in the Proposed Home
 	Default Value:		N/A
 
@@ -109,7 +109,7 @@ Arguments:
 12) average_annual_temp
 	Required:			Yes
 	Type: 				DoubleArgument
-	Display Name: 		The average annual temperature of building's location (Deg F).
+	Display Name: 		The average annual outside dry bulb temperature of building's location (Deg F).
 	Default Value:		N/A
 	
 13) min_monthly_average_temp
@@ -215,7 +215,7 @@ Code Outline:
 				Maximum of 
 					32 
 					or 
-					average_annual_temp + 6 + (0.4 + 0.01 * (average_annual_temp - 44)) * (max_monthly_average_temp - min_monthly_average_temp)) / 2 * SIN((0.986 * ((month * 30 - 15) - 15 - (35 - 1 * (average_annual_temp - 44))) - 90) * PI()/180)
+					average_annual_temp + 6 + (0.4 + 0.01 * (average_annual_temp - 44)) * (max_monthly_average_temp - min_monthly_average_temp)) / 2 * SIN((0.986 * ((month * 30 - 15) - 15 - (35 - 1 * (average_annual_temp - 44))) - 90) * PI()/180) #you might not need the /180, its to convert from rad to degrees
 		next month
 			
 # Step 1 - Create Peak flow objects and unitized (differing monthly) schedule objects for sink, clothes washer, shower, bath and dishwasher
@@ -243,11 +243,11 @@ If using_Standard_DHW_Event_Schedules_and_event_draws = true then create a new c
 
 		For month = 1 to 12 step 1
 
-			shower_daily_usage(month) = 14.0 + 4.67 * (num_bdr) * MAX((105 - site_water_mains_temp(x)) / (120 - site_water_mains_temp(month)),0) ## Note units = gal per day
+			shower_daily_usage(month) = 14.0 + 4.67 * (num_bdr) * MAX((110 - site_water_mains_temp(x)) / (125 - site_water_mains_temp(month)),0) ## Note units = gal per day
 		
-			sinks_daily_usage(month) = 12.5 + 4.16 * (num_bdr) * MAX((105 - site_water_mains_temp(x)) / (120 - site_water_mains_temp(month)),0) ## Note units = gal per day
+			sinks_daily_usage(month) = 12.5 + 4.16 * (num_bdr) * MAX((110 - site_water_mains_temp(x)) / (125 - site_water_mains_temp(month)),0) ## Note units = gal per day
 			
-			baths_daily_usage(month) = 3.5 + 1.17 * (num_bdr) * MAX((105 - site_water_mains_temp(x)) / (120 - site_water_mains_temp(month)),0) ## Note units = gal per day
+			baths_daily_usage(month) = 3.5 + 1.17 * (num_bdr) * MAX((110 - site_water_mains_temp(x)) / (125 - site_water_mains_temp(month)),0) ## Note units = gal per day
 		
 		next month
 		

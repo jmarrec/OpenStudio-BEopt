@@ -13,10 +13,10 @@ Tag		Service Hot Water.Water Heating
 
 Description:
 This measure adds an OS:WaterHeater:Mixed object representing a Natural Gas Storage Water Heater. Users will be asked to provide the following arguments
-1) Use case, 2) Plant loop Assignment 3) Number of Bedrooms, 4) Number of Bathrooms, 5) Tank Volume, 6) Energy Factor, 7) detrated percentage of energy factor
-8) Water HEater Location 9) Setpoint Temperature Schedule, 10) deadband temperature difference, 11) Water Heater Capacity, 12) Recovery Efficiency 13) Water Heater effectiveness and
- 14) Heater Fuel Type
+1) Use case, 2) Plant loop Assignment 3) Number of Bedrooms, 4) Number of Bathrooms, 5) Tank Volume, 6) Energy Factor, 7) Water HEater Location 
+8) Setpoint Temperature Schedule, 9) Water Heater Capacity, 10) Recovery Efficiency and 11) Heater Fuel Type
 
+ #JM removed some inputs: derated % of EF, deadband, effectiveness
 
 Model Description:
 The measure will create a new instance of the OS:WaterHeater:Mixed object representing a Natural Gas Storage Water Heater. The object will either be assigned to an existing plant 
@@ -69,52 +69,37 @@ Arguments:
 	Display Name: 		Rated Energy Factor of Gas Storage Tank Water Heater. This value shoud be entered as a percentage.
 	Default Value:		N/A
 
-
-7) derate_percentage_of_Rated_Energy_Factor
-	Required:		Yes
-	Type: 			DoubleArgument
-	Display Name: 		Percent derate of rated Energy Factor, used to account for the performance derating or degradtion relative to the rated value. 
-	Default Value:		N/A
-
-
-8) shw_setpoint_Temperature
+7) shw_setpoint_Temperature
 	Required:		Yes
 	Type: 			Double Argument
 	Display Name: 		Hot Water Setpoint Temperature (Deg F).
 	Default Value:		125
 
-9) deadband_Temperature_Difference
-	Required:		Yes
-	Type: 			DoubleArgument
-	Display Name: 		The delta temperature difference [°F] between the setpoint and the “cut-in” temperature at 
-				which the heater will turn on. In other words, the “cut-in” temperature is Setpoint – Deadband.
-	Default Value:		3°F
-
-10) water_Heater_Effectiveness
+8) water_Heater_Effectiveness
 	Required:		Yes
 	Type: 			DoubleArgument
 	Display Name: 		Use-Side and Source-Side Effectiveness - representing heat exchanger efficiency. This number can be tuned to achieve results matching the GAMA rated EF 
 				and RE outputs. Search the E+out.eoi output file to review the results for EF and RE
 	Default Value:		1.0
 
-11) Choice List of water_Heater_Location
+9) Choice List of water_Heater_Location
 	Required:		Yes
 	Type: 			StringVector (List of Thermal Zones available in Model)
 	Display Name: 		Thermal Zone where the Gas Storage Water Heater is located.
 	Default Value:		N/A
 
-12) water_Heater_Nominal_Capacity
+10) water_Heater_Nominal_Capacity
 	Required:		Yes
 	Type: 			DoubleArgument
 	Display Name: 		The nominal capacity [MBtu] of the gas storage water heater. Set to 0 to have this field autosized. Set to -1 to follow 2104 BA House Protocols."  
 	Default Value:		N/A
 
-13) water_Heater_recovery_efficiency 
+11) water_Heater_recovery_efficiency 
 	Required:		Yes
 	Type: 			DoubleArgument
-	Display Name: 		Rated Recovery Efficiency of the Water heater equal to the ratio of energy delivered to the water to the energy content of the fuel consumed by the weater heater. 
+	Display Name: 		Rated Recovery Efficiency of the water heater equal to the ratio of energy delivered to the water to the energy content of the fuel consumed by the weater heater. 
 				Test procedures to test recovery efficiency are defined by by DOE in 10 CFR Part 430, Appendix E to Subpart B. Enter this number as a percent. This is used 
-				by EnergyPlus as the thermal efficiency. Users will need to review the E+out.eio file to confirm Calculated recovery efficiency = Rated recovery efficiency.
+				to calculate the thermal efficiency. Users will need to review the E+out.eio file to confirm Calculated recovery efficiency = Rated recovery efficiency.
 	Default Value:		0.80
 
 14) Choice list of water_heater_fuel_type
@@ -139,12 +124,6 @@ If Storage Tank Volume < 0 and <> -1 then write error message "Storage Tank Volu
 If rated_Energy_Factor  > 1.0 then write error message "Rated Energy Factor has a maximum value of 1.0"
 
 If rated_Energy_Factor < 0 and <> -1 then write error message "Rated Energy Factor must be > 0."
-
-If derate_percentage_of_Rated_Energy_Factor > 100 write error message "Derate percentage must be less than 100."
-
-If derate_percentage_of_Rated_Energy_Factor < 0 then write error message "Derate percentage must be >= 0."
-
-If deadband_Temperature_Difference <=0 then write error message "Deadband Temperature Difference must be > 0 deg F."
 
 If water_Heater_Effectiveness < 0 then write error message Gas Water Heater Heat Exchange Effectiveness must be > 0."
 
@@ -171,24 +150,16 @@ If Storage Tank Volume > 100 then write warning message "A hot watter heater wit
 If rated_Energy_Factor < 0.48 then write warning message "Rated Energy Factor for Commercially available Gas Storage Type Water Heaters should be > 0.48."  #Source: AHRI
 If rated_Energy_Factor > 0.82 then write warning message "Rated Energy Factor for Commercially available Gas Storage Type Water Heaters should be < 0.82."  #Source: AHRI	
 
-
-If derate_percentage_of_Rated_Energy_Factor > 15 then write warning message "Parformance degradation factor of <x>% associated with Installed Energy Factor appears to be extreme."
-	
-If deadband_Temperature_Difference > 15 Deg F then write warning message "Deadband Temperature Difference should be < 15 Deg F."
-
-If Water_Heater_Effectiveness < 0.80 then write warning message "Actual Performance of modeled water heater may not match Rated EF and RE per 
-								GAMA and 10CFR430 test procedures. Check EPlusout.eio file for calcuklated EF and RE."
-
 If water_Heater_Nominal_Capacity < 25 MBtu then write warning message"Commercially Available Gas Storage Water Heaters should have a minimum Nominal Capacity of 25 MBtu."
 If Water_Heater_Nominal_Capacity > 75 MBtu then write warning message"Commercially Available Gas Storage Water Heaters should have a maximum Nominal Capacity of 75 MBtu."
 
 
-If water_Heater_recovery_efficiency < 0.70 MBtu then write warning message"Commercially Available Gas Storage Water Heaters should have a minimum reated recovery efficiency of 70%."
-If water_Heater_recovery_efficiency > 0.90 MBtu then write warning message"Commercially Available Gas Storage Water Heaters should have a maximum recovery efficiency of 90%."
+If water_Heater_recovery_efficiency < 0.70 then write warning message "Commercially Available Gas Storage Water Heaters should have a minimum reated recovery efficiency of 70%."
+If water_Heater_recovery_efficiency > 0.90 then write warning message "Commercially Available Gas Storage Water Heaters should have a maximum recovery efficiency of 90%."
 
 
-If Use_Case <> General then write warning message "BA protocols require water heater location to be in attached garage (if climate = hot-humid or 
-									    hot-dry) or unconditioned basement (if climate = all others). Please check table 9 of 2014 simulation protocols."
+If Use_Case <> General then write warning message "BA protocols require water heater location to be in attached garage (ifit exists and the climate = hot-humid or 
+									    hot-dry) or unconditioned basement (if it exists and the climate = all others). Please check table 9 of 2014 simulation protocols."
 
 
 Not Applicable Messages:
@@ -359,7 +330,7 @@ ___________________________________________
 
 		if use_case = NCTH or B10 Benchmark then 
 
-			shw_heater.storage_Tank_Volume = result of lookup of Electric Storage Tank table (#bdr,#bath). ## NOTE Convert to m3 units for assignment) 
+			shw_heater.storage_Tank_Volume = result of lookup of Gas Storage Tank table (#bdr,#bath). ## NOTE Convert to m3 units for assignment) #All gas tank volumes should be 0.95 * nominal volume
 
 			write info message of use_case and shw_heater.storage_Tank_Volume
 
@@ -369,13 +340,9 @@ ___________________________________________
 			
 			write info message of use_case and shw_heater.storage_Tank_Volume
 
-		if use_case = General and storage_Tank_Volume = 0 then
+		if use_case = General 
 
-			shw_heater.setTankVolume("Autosized").
-
-			write info message of use_case and shw_heater.storage_Tank_Volume
-
-			else shw_heater.setTankVolume(storage_Tank_Volume)
+			shw_heater.setTankVolume(storage_Tank_Volume)
 			
 			write info message of use_case and shw_heater.storage_Tank_Volume
 
@@ -383,7 +350,7 @@ ___________________________________________
 
 		if use_case = NCTH or B10 Benchmark or BA Retrofit then 
 
-			create a use schedule where Tsetpoint = constant 120F schedule (all 8760 hours) 
+			create a use schedule where Tsetpoint = constant 125F schedule (all 8760 hours) 
 
 			assign new use schedule to shw_heater.setpoint_Temperature_Schedule_Name 
 
@@ -404,24 +371,14 @@ ___________________________________________
 
 
 	3) attribute setDeadbandTemperatureDifference
-		
-		if use_case = NCTH or B10 Benchmark or BA Retrofit then
 
-			shw_heater.setDeadbandTemperatureDifference(6.111) ## Note convert 15F to Celcius)
-
-			write info message of shw_heater.DeadbandTemperatureDifference
-
-		if use_case = General then 
-
-			shw_heater.setDeadbandTemperatureDifference(deadband_Temperature_Difference)
-
-			write info message of shw_heater.DeadbandTemperatureDifference
+		shw_heater.setDeadbandTemperatureDifference(2) 
 
 	4) attribute shw_heater.setMaximumTemperatureLimit(100) ##Note: Input is in Deg C, 212 converted to Deg C for OS assignment.
 
 			write info message of shw_heater.MaximumTemperatureLimit
 	
-	5) attribute shw_heater.setHeaterControlType("Cycle")
+	5) attribute shw_heater.setHeaterControlType("Modulate")
 
 			write info message of shw_heater.HeaterControlType
 
@@ -429,37 +386,21 @@ ___________________________________________
 	
 		if use_case = NCTH or B10 Benchmark then 
 
-			shw_heater.setHeaterMaximumCapacity =  lookup result of lookup of Electric Storage Tank table (#bdr,#bath). ## NOTE units need to be in W
+			shw_heater.setHeaterMaximumCapacity =  lookup result of lookup of Gas Storage Tank table (#bdr,#bath). ## NOTE units need to be in W
 
 			write info message of shw_heater.HeaterMaximumCapacity
 
 		if use_case = BA Retrofit then 
 			
-				if water_Heater_Nominal_Capacity = 0, then 
-			
-					shw_heater.setHeaterMaximumCapacity("Autosize")
+			shw_heater.setHeaterMaximumCapacity(water_Heater_Nominal_Capacity)
 
-					write info message of shw_heater.HeaterMaximumCapacity
-
-				else 
-	
-					shw_heater.setHeaterMaximumCapacity(water_Heater_Nominal_Capacity)
-
-					write info message of shw_heater.HeaterMaximumCapacity
+			write info message of shw_heater.HeaterMaximumCapacity
 
 		if use_case = General then  
 
-				if water_Heater_Nominal_Capacity = 0, then 
+			shw_heater.setHeaterMaximumCapacity(water_Heater_Nominal_Capacity)
 
-					shw_heater.setHeaterMaximumCapacity("Autosize")
-
-					write info message of shw_heater.HeaterMaximumCapacity
-
-				else 
-
-					shw_heater.setHeaterMaximumCapacity(water_Heater_Nominal_Capacity)
-
-					write info message of shw_heater.HeaterMaximumCapacity
+			write info message of shw_heater.HeaterMaximumCapacity
 
 	7) attribute shw_heater.setHeaterMinimumCapacity(0)
 
@@ -469,7 +410,9 @@ ___________________________________________
 
 			write info message of shw_heater.HeaterFuelType
 
-	9) attribute shw_heater.setHeaterThermalEfficiency(water_Heater_recovery_efficiency)
+	9) attribute shw_heater.setHeaterThermalEfficiency(eta_c)
+	
+			eta_c = recovery_efficiency+UA*(135-67.5)/Rated_input_power
 
 			write info message of shw_heater.HeaterThermalEfficiency
 
@@ -502,11 +445,11 @@ ___________________________________________
 
 		##Note Equation Source = Options tab of BA Analysis Spreadsheet
 		
-		TTank = AVG(setpoint_Temperature_Schedule_Name) + 15 deg F
+		TTank = 135 deg F
 		Assume TEnvironment = 67.5 F 
 
-		UA = ((water_Heater_recovery_efficiency*(1-derate_percentage_of_Rated_Energy_Factor))/(rated_Energy_Factor*(1-derate_percentage_of_Rated_Energy_Factor))-1)/((TTank-67.5)*(24/41073-1/(water_Heater_Nominal_Capacity*(rated_Energy_Factor*(1-derate_percentage_of_Rated_Energy_Factor))))))
-		 
+		UA = (recovery_efficiency/energy_factor-1)/((135-67.5)*24/41073-(135-67.5)/(rated_input_power*energy_factor))
+		
     		## Note: reasonable values of UA should be ~ 10 or less. (UA units should be Btu/hr-F)
 		
 		convert UA into Watts/Kelvin for input into OpenStudio
