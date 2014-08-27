@@ -1,0 +1,485 @@
+NREL Measure Design Document Text File
+
+Note: you can include ruby snippets for arguments and messaged, but it isn't necessary. If you are comfortable with it, it makes writing the measure quicker if the code is already structured here.
+
+EnergyPlus 8.1 documentation reference: http://bigladdersoftware.com/epx/docs/8-1/input-output-reference/page-008.html#sitewatermainstemperature
+
+>> Start of XML content
+
+Measure Name: 	Add OS:WaterHeater:Mixed-Tankless-Gas
+Measure Type: 	ModelMeasure
+
+Tag		Service Hot Water.Water Heating
+
+Description:
+This measure adds an OS:WaterHeater:Mixed object representing a Gas Tankless Water Heater. Users will be asked to provide 8 inputs: 1) Plant Loop Assignment 2) Rated Energy Factor,
+3) derate percentage of energy factor 4) Setpoint Temperature 5) Deadband Temperature Difference 6) Water Heater Capacity, 7) Water Heater Location, 8) Water Heater Effectiveness
+9) Derate for Cycling Inefficiencies, 10) Fuel Type.
+
+
+Model Description:
+The measure will create a new instance of the OS:WaterHeater:Mixed object. The measure will either create a new plant loop to assign the object, or the object will be assigned to an 
+existing plant loop. The object will be configured with the user-defined arguments.The EIO file (generated upon successful simulation) can be viewed to compare the calculated industry standard 
+ratings of Recovery Efficiency and Energy Factor for water heater objects as compared to the user input values for these ratings. Tankless water heaters are assumed to have 1 gallon 
+of storage (0.00379 m3).
+
+
+OpenStudio Version: 1.4.0
+
+>> Start of Measure.rb content
+
+Arguments:
+
+##Note: Since Tankless water heater is not an option for the BA Benchmark house this measure does not include capabiltites for creating BA Benchmark Water heaters
+
+1) Choice list of existing_Plant_Loop_name
+	Required:		Yes
+	Type: 			StringVector (List of Plant Loops available in the model)
+	Display Name: 		Plant Loop to assign Water heater as a Supply Equipment
+	Default Value:		N/A
+	NOTE: One choice should be to make a new heating water plant loop object 
+
+2) rated_Energy_Factor
+	Required:		Yes
+	Type: 			DoubleArgument
+	Display Name: 		Rated Energy Factor of Electric Storage Tank Water Heater
+	Default Value:		N/A
+
+3) derate_percentage_of_Rated_Energy_Factor
+	Required:		Yes
+	Type: 			DoubleArgument
+	Display Name: 		Percent derate of rated Energy Factor, used to account for the performance derating or degradtion relative to the rated value due to installation issues. 
+	Default Value:		N/A
+
+4) shw_Setpoint_Temperature
+	Required:		Yes
+	Type: 			Double Argument
+	Display Name: 		Hot Water Temperature Setpoint
+	Default Value:		N/A
+
+5) deadband_Temperature_Difference
+	Required:		Yes
+	Type: 			DoubleArgument
+	Display Name: 		The delta temperature difference [?°F] between the setpoint and the “cut-in” temperature at 
+				which the heater will turn on. In other words, the “cut-in” temperature is Setpoint – Deadband.
+	Default Value:		3°F
+
+6) water_Heater_Effectiveness
+	Required:		Yes
+	Type: 			DoubleArgument
+	Display Name: 		Use-Side and Source-Side Effectiveness - representing heat exchanger efficiency. This number can be tuned to achieve results matching the GAMA rated EF 
+				and RE outputs. Search the E+out.eoi output file to review the results for EF and RE
+	Default Value:		1.0
+
+7) Choice List of water_Heater_Location
+	Required:		Yes
+	Type: 			StringVector (List of Thermal Zones available in Model)
+	Display Name: 		Thermal Zone where the Electric Storage Water Heater is located.
+	Default Value:		N/A
+
+8) water_Heater_Nominal_Capacity
+	Required:		Yes
+	Type: 			DoubleArgument
+	Display Name: 		The nominal capacity [W] of the electric storage water heater. Set to 0 to have this field autosized. Set to -1 to follow 2104 BA House Protocols."  
+	Default Value:		N/A
+
+9) derate_for_cycling_inefficiencies
+	Required:		Yes
+	Type: 			DoubleArgument
+	Display Name: 		Annual Energy Derate for Cycling Inefficiencies - this factor accounts for the small water draws on the heat exchanger that are not currently reflected
+				in the DOE Energy Factor test procedure. CEC 2008 Title 24 implemented an 8% derate for tankless water heaters.
+	Default Value:		8.8%
+
+10) choice list of fuel_type
+	Required:		Yes
+	Type: 			StringVector
+	Display Name: 		Type of Fuel Used for Heating
+	Default Value:		Natural Gas				
+ 
+11) water_Heater_recovery_efficiency 
+	Required:		Yes
+	Type: 			DoubleArgument
+	Display Name: 		Rated Recovery Efficiency of the Water heater equal to the ratio of energy delivered to the water to the energy content of the fuel consumed by the weater heater. 
+				Test procedures to test recovery efficiency are defined by by DOE in 10 CFR Part 430, Appendix E to Subpart B. Enter this number as a percent. 
+				Users will need to review the E+out.eiop file to confirm Calculated recovery efficiency = Rated recovery efficiency.
+	Default Value:		N/A
+
+
+
+Water heater performance data from here: https://www.ahridirectory.org/ahridirectory/pages/rwh/defaultSearch.aspx
+
+Error Messages:
+
+If OS.SizingPlant.loopType <> "Heating" then write error message "Water Heater must be adder to the supply side of an existing heating plant loop."
+	
+If shw_Setpoint_Temperature < 0 then write error message "Hot water temperature should be > 0."
+
+If Rated Energy Factor  > 1 then write error message "Rated Energy Factor must be less than 1."
+
+If Rated Energy Factor < 0 and <> -1 then write error message "Rated Energy Factor must be > 0."
+
+If derate_percentage_of_Rated_Energy_Factor > 100 write error message "Derate percentage must be less than 100."
+
+If derate_percentage_of_Rated_Energy_Factor < 0 then write error message "Derate percentage must be >= 0."
+
+If deadband_Temperature_Difference <=0 then write error message "Deadband Temperature Difference must be > 0 deg F."
+
+If Water_Heater_Effectiveness < 0 then write error message "Electric Water Heater Heat Exchange Effectiveness must be > 0."
+
+If Water_Heater_Effectiveness > 1 then write error message "Electric Storage Water Heater Heat Exchange Effectiveness must be < 1."
+ 
+If Water Heater Nominal Capacity < 0 and <> -1 then write error message "Electric Storage Water Heater Nominal Capacity must be > 0 kW."
+
+If derate_for_cycling_inefficiencies < 0 then write error message "Derate for cycling inefficiencies should be greater than 0."
+
+If derate_for_cycling_inefficiencies > 1 then write error message "Derate for cycling inefficiencies should be less that 1."
+
+If water_Heater_recovery_efficiency < 0 or > 1 then write error message "Recovery Efficiency value must be between 0 and 1."
+
+
+water_Heater_recovery_efficiency 
+
+Warning Messages:
+
+If OS:Plant Loop already has a water heater attached, then write warning message "Additonal Water heater being added to <plantLoopNam>. User will need to confirm controls."
+If new OS Plant loop is created then write warning message"The wate rheater will be applied to a new OS:PlantLoop object. The plant loop object will be created using default values
+							   please review the values for appropriateness."
+
+
+If shw_Setpoint_Temperature > 140 F then write warning message "Hot Water Setpoint schedule <schedule name> has values > 140F. This temperature, if achieved, may cause scalding."
+If shw_Setpoint_Temperature < 120 F then write warning message""Hot Water Setpoint schedule <schedule name> has values < 120. This temperature may promote the growth of Legionellae or other bacteria."
+
+If rated_Energy_Factor < 0.68 then write warning message "AHRI Certified Energy Factors for Commercially available Gas Tankless Water Heaters should be 0.68 or greater."
+If rated_Energy_Factor > 0.99 then write warning message "AHRI Certified Energy Factors for Commercially available Gas Tankless Water Heaters should be less that 0.99."
+
+If derate_percentage_of_Rated_Energy_Factor > 15 then write warning message "Parformance degradation factor of <x>% associated with Installed Energy Factor appears to be extreme."
+	
+If deadband_Temperature_Difference > 15 Deg F then write warning message "Deadband Temperature Difference should be < 15 Deg F."
+
+If Water Heater Effectiveness < 0.80 then write warning message "Actual Performance of modeled water heater may not match Rated EF and RE per 
+								GAMA and 10CFR430 test procedures. Check EPlusout.eio file for calcuklated EF and RE."
+
+If Water Heater Nominal Capacity < 74.9 KBtuh then write warning message"Commercially Available Gas Tankless Water Heaters should have a minimum Nominal Capacity of 74.9 KBtuh."
+If Water Heater Nominal Capacity > 199.9 KBtuh then write warning message"Commercially Available Gas Tankless Water Heaters should have a maximum Nominal Capacity of 199 KBtuh."
+
+If building_America_Use_Case = New Construction then write warning message "BA protocols require water heater location to be in attached garage (if climate = hot-humid or hot-dry) or unconditioned basement (if climate = all others). Please check table 9 of 2014 simulauiton protocols."
+
+If derate_for_cycling_inefficiencies > 0.12 then write warning message "Derate for cycling inefficiencies of <x%> appears large. CEC 2008 Title 24 recommends 8.8%." 
+
+If water_Heater_recovery_efficiency < 0.77 then write warning message "Commercially Available Gas Tankless Water Heaters should have a minimum recovery efficiency of 77%."
+If water_Heater_recovery_efficiency > 0.99 then write error message "Commercially Available Gas Tankless Water Heaters should have a maximum recovery efficiency of 99%."
+
+
+
+
+Not Applicable Message:
+
+None
+
+Initial Condition:
+
+#Report any current names and associated plant loop name of existing OS:WaterHeater:Mixed object having size less than 2 gallons and fuel = (NaturalGas or PropaneGas) as existing tankless water weaters.
+#Report nominal Capacity (W) of each object.
+
+
+Final Condition:
+
+#If new Hot Water plant loop was created, report the name of the new hot water loop
+#Report the name of new OS:WaterHeater:Mixed object created. Report Size (gal) and nominal Capacity (W) of each object.
+
+Code Outline:
+
+
+>> Start of MyMeasure_Test.rb content
+
+# Get arguments from user
+
+# convert argument method variable into run method variables
+
+# test run method variable for warning messages
+
+# test model for N/A message
+
+# Write Initial Conditions message
+
+# Convert all input variables collected in IP units into SI equivalents (Farenheit to Celcius, etc.)  ##E+ works in SI only##
+
+
+IF new plant loop needed 
+
+	## Create a new plant loop
+
+	    	shw_loop = OpenStudio::Model::PlantLoop.new(model)
+	    	shw_loop.setName("Service Hot Water Loop")
+    		shw_sizing_plant = shw_loop.sizingPlant
+    		shw_sizing_plant.setLoopType("Heating")
+    		shw_sizing_plant.setDesignLoopExitTemperature(50) # note 50 Deg C = 
+    		shw_sizing_plant.setLoopDesignTemperatureDifference(6.67)    
+
+       	## Create a new pump
+
+    		shw_pump = OpenStudio::Model::PumpConstantSpeed.new(model)
+
+	## Configure pump for consuming near zero energy
+
+		shw_pump.setFractionofMotorInefficienciestoFluidStream(1)
+		shw_pump.setMotorEfficiency(0.999)
+		shw_pump.ratedFlowRate(autosized)
+		shw_pump.setPumpControlType(Intermittent)
+		shw_pump.setRatedPowerConsumption(0.001)
+		shw_pump.setRatedPumpHead(0.001)
+
+	## create shw system bypass pipe
+		
+		shw_heater_bypass_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
+        
+    	## create shw supply outlet pipe
+
+		shw_supply_outlet_pipe = OpenStudio::Model::PipeAdiabatic.new(model) 
+
+
+	## create schedule for hot water heater temperature and create a new scheduled setpoint manager to assign the schedule to 
+
+		shw_t_c = OpenStudio::convert(shw_Setpoint_Temperature,"F","C").get
+    		shw_t_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+    		shw_t_sch.setName("SHW Temp")
+    		shw_t_sch.defaultDaySchedule().setName("HW Temp Default")
+    		shw_t_sch.defaultDaySchedule().addValue(OpenStudio::Time.new(0,24,0,0),shw_t_c)
+    		shw_t_stpt_manager = OpenStudio::Model::SetpointManagerScheduled.new(model,shw_t_sch)
+
+	## create new water heater object
+
+		shw_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
+
+	## Configure new water heater object
+
+		(See details below)
+                                                    
+    	## Add the components to the service water loop
+
+    		shw_supply_inlet_node = shw_loop.supplyInletNode
+    		shw_supply_outlet_node = shw_loop.supplyOutletNode
+    		shw_pump.addToNode(shw_supply_inlet_node)
+    		shw_loop.addSupplyBranchForComponent(shw_heater)
+    		shw_loop.addSupplyBranchForComponent(shw_bypass_pipe)
+    		shw_supply_outlet_pipe.addToNode(shw_supply_outlet_node)
+  	   
+  	## Create a scheduled setpoint manager and assign the schedule from user arguments (which may have been modified based on use case) 
+
+		shw_t_stpt_manager = OpenStudio::Model::SetpointManagerScheduled.new(model,shw_t_sch)
+
+	## Add setpoint manager to supply outlet node
+
+  		shw_t_stpt_manager.addToNode(shw_supply_outlet_node) 
+
+If existing plant loop selected
+
+	
+	## Choose loop from selected loop 
+
+		shw_loop = OpenStudio::Model::PlantLoop.name(existing_Plant_Loop_name)  ##NOT SURE IF THIS WILL WORK## 
+
+       	## See if loop pump already exists within slected plant loop, if not then create a new pump
+
+		    		
+		If shw_pump.name = "empty" then shw_pump = OpenStudio::Model::PumpConstantSpeed.new(model)  ##CERTAIN THAT THIS WILL NOT WORK##
+
+	## If a new pump is created, configure new pump for consuming near zero energy
+
+		shw_pump.setFractionofMotorInefficienciestoFluidStream(1)
+		shw_pump.ratedFlowRate(autosized)
+		shw_pump.setMotorEfficiency(0.999)
+		shw_pump.setPumpControlType(Intermittent)
+		shw_pump.setRatedPowerConsumption(0.001)
+		shw_pump.setRatedPumpHead(0.001)
+
+
+	# create schedule for hot water heater temperature and create a new scheduled setpoint manager to assign the schedule to 
+
+		shw_t_c = OpenStudio::convert(shw_Setpoint_Temperature,"F","C").get
+    		shw_t_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+    		shw_t_sch.setName("SHW Temp")
+    		shw_t_sch.defaultDaySchedule().setName("HW Temp Default")
+    		shw_t_sch.defaultDaySchedule().addValue(OpenStudio::Time.new(0,24,0,0),shw_t_c)
+    		shw_t_stpt_manager = OpenStudio::Model::SetpointManagerScheduled.new(model,shw_t_sch)	
+
+
+	## create new water heater object
+
+		shw_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
+
+	## Configure new water heater object
+
+		(See details below)
+                                                     
+    	## Add new water heater to the existing service water loop
+
+		shw_loop.addSupplyBranchForComponent(shw_heater)
+
+	## If new pump created add to existing loop
+
+    		shw_pump.addToNode(shw_supply_inlet_node)
+  
+	## Check to see if setpoint manager already exists. If not, create a scheduled setpoint manager and assign the schedule from user arguments (which may have been modified based on use case) 
+
+		##Check what is on the supply outlet node of the existing loop - setpoint manager or something else.  ## needs to be written in ruby###
+		
+	## If a new setpoint manage is needed, create one and assign it to the supply outlet node..
+
+		shw_t_stpt_manager = OpenStudio::Model::SetpointManagerScheduled.new(model,setpoint_Temperature_Schedule_Name)
+		shw_t_stpt_manager.addToNode(shw_supply_outlet_node) 
+
+
+	##Write initial conditions message
+	
+		Initial conditions message should indicate the number of OS:WaterHeater:Mixed objects (of Gas Tankless type) that the model had prior to the measure
+	
+	##write final conditions message
+
+		Final conditions message should be indicate that 1 Gas Tankless water heater was added, the loop name it was added to, and the capacity in units of Kbtu/hr
+
+
+	1) attribute setTankVolume 
+
+		
+		if storage_Tank_Volume = 0 then
+
+			shw_heater.setTankVolume("Autosized").
+
+			write info message of object_to_be_created and shw_heater.storage_Tank_Volume
+
+			else shw_heater.setTankVolume(0.00379)
+			
+			write info message of object_to_be_created and shw_heater.storage_Tank_Volume
+
+	2) attribute setSetpointTemperatureSchedule
+
+			##create a new hot water temp schedule where Tsetpoint = shw_Setpoint_Temperature
+
+			##assign the created temp schedule to shw_heater.setpoint_Temperature_Schedule_Name 
+
+			shw_heater.setSetpointTemperatureSchedule(setpoint_Temperature_Schedule_Name)			
+
+			write info message of shw_heater.setpoint_Temperature_Schedule_Name and schedule value			
+ 
+	3) attribute setDeadbandTemperatureDifference
+		
+			shw_heater.setDeadbandTemperatureDifference(deadband_Temperature_Difference)
+
+			write info message of shw_heater.DeadbandTemperatureDifference
+
+	4) attribute shw_heater.setMaximumTemperatureLimit(99) 
+
+			write info message of shw_heater.MaximumTemperatureLimit
+	
+	5) attribute shw_heater.setHeaterControlType("Cycle")
+
+			write info message of shw_heater.HeaterControlType
+
+	6) attribute shw_heater.setHeaterMaximumCapacity 
+	
+			if water_Heater_Nominal_Capacity = 0, then 
+
+				shw_heater.setHeaterMaximumCapacity("Autosize")
+	
+				write info message of shw_heater.HeaterMaximumCapacity
+
+			else 
+
+			shw_heater.setHeaterMaximumCapacity(water_Heater_Nominal_Capacity)
+
+			write info message of shw_heater.HeaterMaximumCapacity
+
+	7) attribute shw_heater.setHeaterMinimumCapacity(0)
+
+			write info message of shw_heater.HeaterMinimumCapacity
+
+	8) attribute shw_heater.setHeaterFuelType(fuel_type) ## Note NaturalGas or PropaneGas
+
+			write info message of shw_heater.HeaterFuelType
+
+	9) attribute shw_heater.setHeaterThermalEfficiency
+
+			= (water_Heater_recovery_efficiency) * (1 - derate_for_cycling_inefficiencies)
+
+			write info message of shw_heater.HeaterThermalEfficiency
+
+	10) attribute shw_heater.setPartLoadFactorCurve = OPTIONAL - NOT USED
+
+	11) attribute shw_heater.setOffCycleParasiticFuelConsumptionRate = OPTIONAL - NOT USED
+
+	12) attibute shw_heater.setOffCycleParasiticFuelType = OPTIONAL - NOT USED
+
+	13) attribute shw_heater.setOffCycleParasiticHeatFractiontoTank = OPTIONAL - NOT USED
+
+	14) attribute shw_heater.setOnCycleParasiticFuelConsumptionRate - OPTIONAL - NOT USED
+
+	15) attribute shw_heater.setOnCycleParasiticFuelType = OPTIONAL - NOT USED
+
+	16) attribute shw_heater.setOnCycleParasiticHeatFractiontoTank = OPTIONAL - NOT USED
+
+	17) attribute shw_heater.setAmbientTemperatureIndicator("Zone")
+
+			write info message of shw_heater.AmbientTemperatureIndicator
+
+	18) attribute shw_heater.setAmbientTemperatureSchedule = OPTIONAL - NOT USED
+	
+	19) attribute shw_heater.setAmbientTemperatureThermalZone = water_Heater_Location
+
+	20) attribute shw_heater.setAmbientTemperatureOutdoorAirNodeName = OPTIONAL - NOT USED
+
+	21) attribute shw_heater.setOffCycleLossCoefficienttoAmbientTemperature
+
+		shw_heater.setOffCycleLossCoefficienttoAmbientTemperature(0)  ## Source = Cell Q4594, Options Sheet of BA_Analysis_FY10.xlsm spreadsheet
+
+		write info message of shw_heater.OffCycleLossCoefficienttoAmbientTemperature
+
+	22) attribute shw_heater.setOffCycleLossFractiontoThermalZone = 1.0
+
+		write info message of shw_heater.OffCycleLossFractiontoThermalZone 
+
+	23) attribute shw_heater.setOnCycleLossCoefficienttoAmbientTemperature
+		
+		shw_heater.setOnCycleLossCoefficienttoAmbientTemperature(0)  ## Source = Cell Q4594, Options Sheet of BA_Analysis_FY10.xlsm spreadsheet
+
+		write info message of shw_heater.OnCycleLossCoefficienttoAmbientTemperature 
+
+	24) attribute shw_heater.setOnCycleLossFractiontoThermalZone = 1.0
+
+		write info message of shw_heater.OnCycleLossFractiontoThermalZone
+
+	25) attribute shw_heater.setPeakUseFlowRate = OPTIONAL - NOT USED
+
+	26) attribute shw_heater.setUseFlowRateFractionSchedule = OPTIONAL - NOT USED
+
+	27) attibute shw_heater.setColdWaterSupplyTemperatureSchedule = OPTIONAL - NOT USED
+
+	28) attribute shw_heater.setUseSideEffectiveness = water_Heater_Effectiveness
+
+		write info message of shw_heater.UseSideEffectiveness
+
+	29) attribute shw_heater.setSourceSideEffectiveness = water_Heater_Effectiveness
+
+		write info message of shw_heater.SourceSideEffectiveness
+
+	30) attribute shw_heater.setUseSideDesignFlowRate = "autosize"
+
+	31) attribute shw_heater.setSourceSideDesignFlowRate = OPTIONAL - NOT USED
+
+	32) attribute shw_heater.setIndirectWaterHeatingRecoveryTime - OPTIONAL - Not Used
+
+## End of measure
+
+
+Tests:
+
+Need to create a model with 
+
+1) No existing hot water system, but empty 
+# get arguments and test that they are what we are expecting
+# set arguments to bad values and see that it fails as expected
+# set arguments to match E+ idd default values 
+# set arguments to good values (not default values)
+# Run twice, set arguments to good values on model working default
+
+
