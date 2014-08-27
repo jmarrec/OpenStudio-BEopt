@@ -13,13 +13,13 @@ Tag		Service Hot Water.Water Heating
 
 Description:
 This measure adds an object representing the cold water temperatures delivered by underground water main pipes to the building. Water mains temperatures are a function of outdoor 
-climate conditions and vary with time of year. Users input two arguments: 1) The average annual outdoor air temperature (dry bulb, deg C) and 
-2) The maximum difference in monthly average outdoor air temperatures (dry bulb, deg C). The arguments are used in a correlation formulated to predict the water mains temperatures. 
+climate conditions and vary with time of year. Users input two arguments: 1) The average annual outdoor air temperature (dry bulb, deg F) and 
+2) The maximum difference in monthly average outdoor air temperatures (dry bulb, deg F). The arguments are used in a correlation formulated to predict the water mains temperatures. 
 All OS:WaterUse:Equipment, OS:WaterHeater:Mixed, OS:WaterHeater:Stratified (not supported as of OS1.4.0) or OS WaterUse:Connections objects included in your model will use this 
 temperature as the cold water inlet temperature. See the EnergyPlus Engineering Reference for correlation details.
 
 Model Description:
-The measure will create a new instance of the OS:Site:WaterMainsTemperature object. The object will be configured to use the correlation method and will accept two user arguments 1) The average annual outdoor air temperature (dry bulb, deg C) and 2) The maximum difference in monthly average outdoor air temperatures (dry bulb, deg C). While multiple SiteWaterMains temperature objects can be created, only the most recently created one will be active during model calculations. 
+The measure will create a new instance of the OS:Site:WaterMainsTemperature object. The object will be configured to use the correlation method and will accept two user arguments 1) The average annual outdoor air temperature (dry bulb, deg F) and 2) The maximum difference in monthly average outdoor air temperatures (dry bulb, deg F). While multiple SiteWaterMains temperature objects can be created, only the most recently created one will be active during model calculations. 
 
 OpenStudio Version: 1.4.0
 
@@ -44,16 +44,16 @@ Error Message:
 Validate input arguments. 
 
 If Avg Outdoor Air Temp > 85 F 	#Death Valley, USA  = 77 F
-If Avg Outdoor Air Temp < -70 F	#Vostock, Russia = -67 F
+If Avg Outdoor Air Temp < -70 F	#Vostok, Antarctica = -67 F
 
 If Max Diff OAT > 40 			#Death Valley, USA  ~ 30 F
 If Max Diff OAT < 0 			# Cannot have negative numbers
 
 Warning Message:
 
-If Avg Outdoor Air Temp = 10 F 		#Default
+If Avg Outdoor Air Temp = 50 F 		#Default
 If Avg Outdoor Air Temp > 70 F		#Note Death Valley, USA = 77 F
-If Avg Outdoor Air Temp < -40F		#Note Vostock, Russia = -67 F
+If Avg Outdoor Air Temp < -40F		#Note Vostok, Antarctica = -67 F
 
 If Max Diff OAT > 30 			#Note Death Valley, USA  ~ 30 F
 
@@ -64,7 +64,7 @@ Info Message:
 #	OS:WaterHeater:Mixed
 #	OS:WaterUse:Connections 
 
-	# List quantity of each object that will be affected by the change 	in inlet water tempoerature. 
+	# List quantity of each object that will be affected by the change 	in inlet water temperature. 
 
 Not Applicable Message:
 
@@ -123,3 +123,4 @@ Tests:
 # Run twice, set arguments to good values on model working default 	hot water system and usage. Confirm difference in HW energy usage.
 
 ## Note - future enhancement may be to parse the weather file to automatically determine the measure argument. 
+## There's already a measure that parses the .stat file to determine arguments (https://bcl.nrel.gov/search/site/mains?f[0]=bundle%3Anrel_measure), could be useful for the future enhancement if there's time
