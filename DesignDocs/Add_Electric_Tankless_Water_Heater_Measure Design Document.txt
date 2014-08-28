@@ -12,10 +12,8 @@ Measure Type: 	ModelMeasure
 Tag		Service Hot Water.Water Heating
 
 Description:
-This measure adds an OS:WaterHeater:Mixed object representing an Electric Gas Tankless Water Heater. Users will be asked to provide 8 inputs: 1) Plant Loop Assignment 2) Rated Energy Factor,
-3) Setpoint Temperature 4) Water Heater Capacity, 5) Water Heater Location, 6) Derate for cycling inefficiencies.
-
-#JM removed some arguments: derate percentage of EF, deadband, effectiveness
+This measure adds an OS:WaterHeater:Mixed object representing an Electric Gas Tankless Water Heater. Users will be asked to provide 8 inputs: 1) Plant Loop Assignment 2) Rated Energy Factor
+3) Setpoint Temperature 4) Water Heater Capacity 5) Water Heater Location 6) Derate for cycling inefficiencies.
 
 Model Description:
 The measure will create a new instance of the OS:WaterHeater:Mixed object. The measure will either create a new plant loop to assign the object, or the object will be assigned to an 
@@ -30,7 +28,7 @@ OpenStudio Version: 1.4.0
 
 Arguments:
 
-##Note: Since Tankless water heater is not an option for the BA Benchmark house this measure does not include capabiltites for creating BA Benchmark Water heaters
+##Note: Since Tankless water heater is not an option for the BA Benchmark house this measure does not include capabilities for creating BA Benchmark Water heaters
 
 1) Choice list of existing_Plant_Loop_name
 	Required:		Yes
@@ -46,32 +44,30 @@ Arguments:
 	Default Value:		N/A
 
 3) shw_Setpoint_Temperature
-	Required:		Yes
-	Type: 			Double Argument
+	Required:			Yes
+	Type: 				Double Argument
 	Display Name: 		Hot Water Temperature Setpoint
 	Default Value:		N/A
 
 4) Choice List of water_Heater_Location
-	Required:		Yes
-	Type: 			StringVector (List of Thermal Zones available in Model)
+	Required:			Yes
+	Type: 				StringVector (List of Thermal Zones available in Model)
 	Display Name: 		Thermal Zone where the Electric Storage Water Heater is located.
 	Default Value:		N/A
 
 5) water_Heater_Nominal_Capacity
-	Required:		Yes
-	Type: 			DoubleArgument
+	Required:			Yes
+	Type: 				DoubleArgument
 	Display Name: 		The nominal capacity [kW] of the electric tankless water heater. Set to 0 to have this field autosized. Set to -1 to follow 2104 BA House Protocols."  
 	Default Value:		N/A
 
 6) derate_for_cycling_inefficiencies
-	Required:		Yes
-	Type: 			DoubleArgument
+	Required: 			Yes
+	Type: 				DoubleArgument
 	Display Name: 		Annual Energy Derate for Cycling Inefficiencies - this factor accounts for the small water draws on the heat exchanger that are not currently reflected
-				in the DOE Energy Factor test procedure. CEC 2008 Title 24 implemented an 8% derate for tankless water heaters.
-	Default Value:		N/A
-
-Process setpoint temperature schedule name to determine annual average temperature of delivered hot water. 
-
+						in the DOE Energy Factor test procedure. CEC 2008 Title 24 implemented an 8% derate for tankless water heaters.
+	Default Value: 		N/A
+	
 Water heater performance data from here: https://www.ahridirectory.org/ahridirectory/pages/rwh/defaultSearch.aspx
 
 Error Messages:
@@ -83,22 +79,17 @@ If shw_Setpoint_Temperature < 0 then write error message "Hot water temperature 
 If Rated Energy Factor  > 1 then write error message "Rated Energy Factor must be less than 1."
 
 If Rated Energy Factor < 0 and <> -1 then write error message "Rated Energy Factor must be > 0."
-
-If Water_Heater_Effectiveness < 0 then write error message "Electric Water Heater Heat Exchange Effectiveness must be > 0."
-
-If Water_Heater_Effectiveness > 1 then write error message "Electric Storage Water Heater Heat Exchange Effectiveness must be < 1."
  
-If Water Heater Nominal Capacity < 0 and <> -1 then write error message "Electric Storage Water Heater Nominal Capacity must be > 0 kW."
+If Water Heater Nominal Capacity < 0 and <> -1 then write error message "Electric Tankless Water Heater Nominal Capacity must be > 0 kW."
 
 If derate_for_cycling_inefficiencies < 0 then write error message "Derate for cycling inefficiencies should be greater than 0."
 
 If derate_for_cycling_inefficiencies > 1 then write error message "Derate for cycling inefficiencies should be less that 1."
 
 
-
 Warning Messages:
 
-If OS:Plant Loop already has a water heater attached, then write warning message "Additonal Water heater being added to <plantLoopNam>. User will need to confirm controls."
+If OS:Plant Loop already has a water heater attached, then write warning message "Additional Water heater being added to <plantLoopNam>. User will need to confirm controls."
 If new OS Plant loop is created then write warning message"The wate rheater will be applied to a new OS:PlantLoop object. The plant loop object will be created using defualt values
 							   please review the values for appropriateness."
  
@@ -110,7 +101,7 @@ If rated_Energy_Factor < 0.98 then write warning message "AHRI Certified Energy 
 
 If derate_percentage_of_Rated_Energy_Factor > 15 then write warning message "Parformance degradation factor of <x>% associated with Installed Energy Factor appears to be extreme."
 
-If Water Heater Nominal Capacity < 2.4 kW then write warning message"Commercially Available Electric Storage Water Heaters should have a minimum Nominal Capacity of 2.4 kW."
+If Water Heater Nominal Capacity < 2.4 kW then write warning message"Commercially Available Electric Tankless Heaters should have a minimum Nominal Capacity of 2.4 kW."
 
 If derate_for_cycling_inefficiencies > 0.12 then write warning message "Derate for cycling inefficiencies of <x%> appears large. CEC 2008 Title 24 recommends 8.8%." 
 
@@ -294,10 +285,10 @@ If existing plant loop selected
 			write info message of shw_heater.setpoint_Temperature_Schedule_Name and schedule value			
  
 			
-	3) attribute setDeadbandTemperatureDifference
+	3) attribute setDeadbandTemperatureDifference(0)
 		
-			shw_heater.setDeadbandTemperatureDifference(0)
-
+			write info message of setDeadbandTemperatureDifference
+			
 	4) attribute shw_heater.setMaximumTemperatureLimit(99)
 
 			write info message of shw_heater.MaximumTemperatureLimit
@@ -330,8 +321,8 @@ If existing plant loop selected
 
 	9) attribute shw_heater.setHeaterThermalEfficiency
 
-			= Energy_Factor * (1 - derate_for_cycling_inefficiencies)
-
+			= rated_Energy_Factor * (1 - derate_for_cycling_inefficiencies)
+			
 			write info message of shw_heater.HeaterThermalEfficiency
 
 	10) attribute shw_heater.setPartLoadFactorCurve = OPTIONAL - NOT USED
