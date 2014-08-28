@@ -44,16 +44,16 @@ Error Message:
 Validate input arguments. 
 
 If Avg Outdoor Air Temp > 85 F 	#Death Valley, USA  = 77 F
-If Avg Outdoor Air Temp < -70 F	#Vostok, Antarctica = -67 F
+If Avg Outdoor Air Temp < -70 F	#Vostock, Antartica = -67 F
 
 If Max Diff OAT > 40 			#Death Valley, USA  ~ 30 F
 If Max Diff OAT < 0 			# Cannot have negative numbers
 
 Warning Message:
 
-If Avg Outdoor Air Temp = 50 F 		#Default
+If Avg Outdoor Air Temp = 10 F 		#Default
 If Avg Outdoor Air Temp > 70 F		#Note Death Valley, USA = 77 F
-If Avg Outdoor Air Temp < -40F		#Note Vostok, Antarctica = -67 F
+If Avg Outdoor Air Temp < -40F		#Note Vostock, Antartica = -67 F
 
 If Max Diff OAT > 30 			#Note Death Valley, USA  ~ 30 F
 
