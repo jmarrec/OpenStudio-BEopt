@@ -13,9 +13,8 @@ Tag		Service Hot Water.Water Heating
 
 Description:
 This measure adds an OS:WaterHeater:Mixed object representing a Gas Tankless Water Heater. Users will be asked to provide 8 inputs: 1) Plant Loop Assignment 2) Rated Energy Factor,
-3) Setpoint Temperature 4) Water Heater Capacity, 5) Water Heater Location, 6) Derate for Cycling Inefficiencies, 7) Fuel Type.
+3) Setpoint Temperature 4) Water Heater Capacity 5) Water Heater Location 6) Derate for Cycling Inefficiencies 7) Fuel Type.
 
-#JM: removed some arguments: derate %, deadband temperature, effectiveness
 
 Model Description:
 The measure will create a new instance of the OS:WaterHeater:Mixed object. The measure will either create a new plant loop to assign the object, or the object will be assigned to an 
@@ -30,7 +29,7 @@ OpenStudio Version: 1.4.0
 
 Arguments:
 
-##Note: Since Tankless water heater is not an option for the BA Benchmark house this measure does not include capabiltites for creating BA Benchmark Water heaters
+##Note: Since Tankless water heater is not an option for the BA Benchmark house this measure does not include capabilities for creating BA Benchmark Water heaters
 
 1) Choice list of existing_Plant_Loop_name
 	Required:		Yes
@@ -46,36 +45,36 @@ Arguments:
 	Default Value:		N/A
 
 3) shw_Setpoint_Temperature
-	Required:		Yes
-	Type: 			Double Argument
+	Required:			Yes
+	Type: 				Double Argument
 	Display Name: 		Hot Water Temperature Setpoint
 	Default Value:		N/A
 
 4) Choice List of water_Heater_Location
-	Required:		Yes
-	Type: 			StringVector (List of Thermal Zones available in Model)
+	Required:			Yes
+	Type: 				StringVector (List of Thermal Zones available in Model)
 	Display Name: 		Thermal Zone where the Electric Storage Water Heater is located.
 	Default Value:		N/A
 
 5) water_Heater_Nominal_Capacity
-	Required:		Yes
-	Type: 			DoubleArgument
-	Display Name: 		The nominal capacity [W] of the electric storage water heater. Set to 0 to have this field autosized. Set to -1 to follow 2104 BA House Protocols."  
+	Required:			Yes
+	Type: 				DoubleArgument
+	Display Name: 		The nominal capacity [W] of the electric storage water heater. Set to -1 to follow 2104 BA House Protocols."  
 	Default Value:		N/A
 
-6) derate_for_cycling_inefficiencies
-	Required:		Yes
-	Type: 			DoubleArgument
-	Display Name: 		Annual Energy Derate for Cycling Inefficiencies - this factor accounts for the small water draws on the heat exchanger that are not currently reflected
-				in the DOE Energy Factor test procedure. CEC 2008 Title 24 implemented an 8% derate for tankless water heaters.
-	Default Value:		8.8%
-
-7) choice list of fuel_type
-	Required:		Yes
-	Type: 			StringVector
+6) choice list of fuel_type
+	Required:			Yes
+	Type: 				StringVector
 	Display Name: 		Type of Fuel Used for Heating
 	Default Value:		Natural Gas				
  
+7) water_Heater_recovery_efficiency 
+	Required:			Yes
+	Type: 				DoubleArgument
+	Display Name: 		Rated Recovery Efficiency of the Water heater equal to the ratio of energy delivered to the water to the energy content of the fuel consumed by the water heater. 
+						Test procedures to test recovery efficiency are defined by by DOE in 10 CFR Part 430, Appendix E to Subpart B. Enter this number as a percent. 
+						Users will need to review the E+out.eiop file to confirm Calculated recovery efficiency = Rated recovery efficiency.
+	Default Value:		N/A
 
 
 
@@ -295,11 +294,9 @@ If existing plant loop selected
 		Final conditions message should be indicate that 1 Gas Tankless water heater was added, the loop name it was added to, and the capacity in units of Kbtu/hr
 
 
-	1) attribute setTankVolume 
+	1) attribute setTankVolume(0.00379) 
 
-			else shw_heater.setTankVolume(0.00379)
-			
-			write info message of shw_heater.SetTankVolume
+			write info message of shw_heater.storage_Tank_Volume
 
 	2) attribute setSetpointTemperatureSchedule
 
@@ -321,7 +318,7 @@ If existing plant loop selected
 
 			write info message of shw_heater.MaximumTemperatureLimit
 	
-	5) attribute shw_heater.setHeaterControlType("Modulate")
+	5) attribute shw_heater.setHeaterControlType("Cycle")
 
 			write info message of shw_heater.HeaterControlType
 
@@ -350,7 +347,7 @@ If existing plant loop selected
 	9) attribute shw_heater.setHeaterThermalEfficiency
 
 			= (energy_factor) * (1 - derate_for_cycling_inefficiencies)
-
+			
 			write info message of shw_heater.HeaterThermalEfficiency
 
 	10) attribute shw_heater.setPartLoadFactorCurve = OPTIONAL - NOT USED
