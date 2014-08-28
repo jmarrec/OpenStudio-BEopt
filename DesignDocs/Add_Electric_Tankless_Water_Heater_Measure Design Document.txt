@@ -13,8 +13,9 @@ Tag		Service Hot Water.Water Heating
 
 Description:
 This measure adds an OS:WaterHeater:Mixed object representing an Electric Gas Tankless Water Heater. Users will be asked to provide 8 inputs: 1) Plant Loop Assignment 2) Rated Energy Factor,
-3) derate percentage of energy factor 4) Setpoint Temperature 5) Deadband Temperature Difference 6) Water Heater Capacity, 7) Water Heater Location, 8) Water Heater Effectiveness
-9) Derate for cycling inefficiencies.
+3) Setpoint Temperature 4) Water Heater Capacity, 5) Water Heater Location, 6) Derate for cycling inefficiencies.
+
+#JM removed some arguments: derate percentage of EF, deadband, effectiveness
 
 Model Description:
 The measure will create a new instance of the OS:WaterHeater:Mixed object. The measure will either create a new plant loop to assign the object, or the object will be assigned to an 
@@ -29,7 +30,7 @@ OpenStudio Version: 1.4.0
 
 Arguments:
 
-##Note: Since Tankless water heater is not an option for the BA Benchmark house this measure does not include capabiltites for creating BA Benchmark Wtaer heaters
+##Note: Since Tankless water heater is not an option for the BA Benchmark house this measure does not include capabiltites for creating BA Benchmark Water heaters
 
 1) Choice list of existing_Plant_Loop_name
 	Required:		Yes
@@ -44,45 +45,25 @@ Arguments:
 	Display Name: 		Rated Energy Factor of Electric Storage Tank Water Heater
 	Default Value:		N/A
 
-3) derate_percentage_of_Rated_Energy_Factor
-	Required:		Yes
-	Type: 			DoubleArgument
-	Display Name: 		Percent derate of rated Energy Factor, used to account for the performance derating or degradtion relative to the rated value due to installation issues. 
-	Default Value:		N/A
-
-4) shw_Setpoint_Temperature
+3) shw_Setpoint_Temperature
 	Required:		Yes
 	Type: 			Double Argument
 	Display Name: 		Hot Water Temperature Setpoint
 	Default Value:		N/A
 
-5) deadband_Temperature_Difference
-	Required:		Yes
-	Type: 			DoubleArgument
-	Display Name: 		The delta temperature difference [?°F] between the setpoint and the “cut-in” temperature at 
-				which the heater will turn on. In other words, the “cut-in” temperature is Setpoint – Deadband.
-	Default Value:		3°F
-
-6) water_Heater_Effectiveness
-	Required:		Yes
-	Type: 			DoubleArgument
-	Display Name: 		Use-Side and Source-Side Effectiveness - representing heat exchanger efficiency. This number can be tuned to achieve results matching the GAMA rated EF 
-				and RE outputs. Search the E+out.eoi output file to review the results for EF and RE
-	Default Value:		1.0
-
-7) Choice List of water_Heater_Location
+4) Choice List of water_Heater_Location
 	Required:		Yes
 	Type: 			StringVector (List of Thermal Zones available in Model)
 	Display Name: 		Thermal Zone where the Electric Storage Water Heater is located.
 	Default Value:		N/A
 
-8) water_Heater_Nominal_Capacity
+5) water_Heater_Nominal_Capacity
 	Required:		Yes
 	Type: 			DoubleArgument
-	Display Name: 		The nominal capacity [W] of the electric storage water heater. Set to 0 to have this field autosized. Set to -1 to follow 2104 BA House Protocols."  
+	Display Name: 		The nominal capacity [kW] of the electric tankless water heater. Set to 0 to have this field autosized. Set to -1 to follow 2104 BA House Protocols."  
 	Default Value:		N/A
 
-9) derate_for_cycling_inefficiencies
+6) derate_for_cycling_inefficiencies
 	Required:		Yes
 	Type: 			DoubleArgument
 	Display Name: 		Annual Energy Derate for Cycling Inefficiencies - this factor accounts for the small water draws on the heat exchanger that are not currently reflected
@@ -102,12 +83,6 @@ If shw_Setpoint_Temperature < 0 then write error message "Hot water temperature 
 If Rated Energy Factor  > 1 then write error message "Rated Energy Factor must be less than 1."
 
 If Rated Energy Factor < 0 and <> -1 then write error message "Rated Energy Factor must be > 0."
-
-If derate_percentage_of_Rated_Energy_Factor > 100 write error message "Derate percentage must be less than 100."
-
-If derate_percentage_of_Rated_Energy_Factor < 0 then write error message "Derate percentage must be >= 0."
-
-If deadband_Temperature_Difference <=0 then write error message "Deadband Temperature Difference must be > 0 deg F."
 
 If Water_Heater_Effectiveness < 0 then write error message "Electric Water Heater Heat Exchange Effectiveness must be > 0."
 
@@ -134,16 +109,8 @@ If shw_Setpoint_Temperature < 120 F then write warning message""Hot Water Setpoi
 If rated_Energy_Factor < 0.98 then write warning message "AHRI Certified Energy Factors for Commercially available Electric Storage Water Heaters should be 0.98 or greater."
 
 If derate_percentage_of_Rated_Energy_Factor > 15 then write warning message "Parformance degradation factor of <x>% associated with Installed Energy Factor appears to be extreme."
-	
-If deadband_Temperature_Difference > 15 Deg F then write warning message "Deadband Temperature Difference should be < 15 Deg F."
-
-If Water Heater Effectiveness < 0.80 then write warning message "Actual Performance of modeled water heater may not match Rated EF and RE per 
-								GAMA and 10CFR430 test procedures. Check EPlusout.eio file for calcuklated EF and RE."
 
 If Water Heater Nominal Capacity < 2.4 kW then write warning message"Commercially Available Electric Storage Water Heaters should have a minimum Nominal Capacity of 2.4 kW."
-If Water Heater Nominal Capacity > 12.0 kW then write warning message"Commercially Available Electric Storage Water Heaters should have a maximum Nominal Capacity of 12.0 kW."
-
-If building_America_Use_Case = New Construction then write warning message "BA protocols require water heater location to be in attached garage (if climate = hot-humid or hot-dry) or unconditioned basement (if climate = all others). Please check table 9 of 2014 simulauiton protocols."
 
 If derate_for_cycling_inefficiencies > 0.12 then write warning message "Derate for cycling inefficiencies of <x%> appears large. CEC 2008 Title 24 recommends 8.8%." 
 
@@ -329,15 +296,13 @@ If existing plant loop selected
 			
 	3) attribute setDeadbandTemperatureDifference
 		
-			shw_heater.setDeadbandTemperatureDifference(deadband_Temperature_Difference)
-
-			write info message of shw_heater.DeadbandTemperatureDifference
+			shw_heater.setDeadbandTemperatureDifference(0)
 
 	4) attribute shw_heater.setMaximumTemperatureLimit(99)
 
 			write info message of shw_heater.MaximumTemperatureLimit
 	
-	5) attribute shw_heater.setHeaterControlType("Cycle")
+	5) attribute shw_heater.setHeaterControlType("Modulate")
 
 			write info message of shw_heater.HeaterControlType
 
@@ -365,7 +330,7 @@ If existing plant loop selected
 
 	9) attribute shw_heater.setHeaterThermalEfficiency
 
-			= 0.98 * (1 - derate_for_cycling_inefficiencies)
+			= Energy_Factor * (1 - derate_for_cycling_inefficiencies)
 
 			write info message of shw_heater.HeaterThermalEfficiency
 

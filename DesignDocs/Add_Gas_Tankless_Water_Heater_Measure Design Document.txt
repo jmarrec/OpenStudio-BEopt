@@ -13,9 +13,9 @@ Tag		Service Hot Water.Water Heating
 
 Description:
 This measure adds an OS:WaterHeater:Mixed object representing a Gas Tankless Water Heater. Users will be asked to provide 8 inputs: 1) Plant Loop Assignment 2) Rated Energy Factor,
-3) derate percentage of energy factor 4) Setpoint Temperature 5) Deadband Temperature Difference 6) Water Heater Capacity, 7) Water Heater Location, 8) Water Heater Effectiveness
-9) Derate for Cycling Inefficiencies, 10) Fuel Type.
+3) Setpoint Temperature 4) Water Heater Capacity, 5) Water Heater Location, 6) Derate for Cycling Inefficiencies, 7) Fuel Type.
 
+#JM: removed some arguments: derate %, deadband temperature, effectiveness
 
 Model Description:
 The measure will create a new instance of the OS:WaterHeater:Mixed object. The measure will either create a new plant loop to assign the object, or the object will be assigned to an 
@@ -45,64 +45,37 @@ Arguments:
 	Display Name: 		Rated Energy Factor of Electric Storage Tank Water Heater
 	Default Value:		N/A
 
-3) derate_percentage_of_Rated_Energy_Factor
-	Required:		Yes
-	Type: 			DoubleArgument
-	Display Name: 		Percent derate of rated Energy Factor, used to account for the performance derating or degradtion relative to the rated value due to installation issues. 
-	Default Value:		N/A
-
-4) shw_Setpoint_Temperature
+3) shw_Setpoint_Temperature
 	Required:		Yes
 	Type: 			Double Argument
 	Display Name: 		Hot Water Temperature Setpoint
 	Default Value:		N/A
 
-5) deadband_Temperature_Difference
-	Required:		Yes
-	Type: 			DoubleArgument
-	Display Name: 		The delta temperature difference [?°F] between the setpoint and the “cut-in” temperature at 
-				which the heater will turn on. In other words, the “cut-in” temperature is Setpoint – Deadband.
-	Default Value:		3°F
-
-6) water_Heater_Effectiveness
-	Required:		Yes
-	Type: 			DoubleArgument
-	Display Name: 		Use-Side and Source-Side Effectiveness - representing heat exchanger efficiency. This number can be tuned to achieve results matching the GAMA rated EF 
-				and RE outputs. Search the E+out.eoi output file to review the results for EF and RE
-	Default Value:		1.0
-
-7) Choice List of water_Heater_Location
+4) Choice List of water_Heater_Location
 	Required:		Yes
 	Type: 			StringVector (List of Thermal Zones available in Model)
 	Display Name: 		Thermal Zone where the Electric Storage Water Heater is located.
 	Default Value:		N/A
 
-8) water_Heater_Nominal_Capacity
+5) water_Heater_Nominal_Capacity
 	Required:		Yes
 	Type: 			DoubleArgument
 	Display Name: 		The nominal capacity [W] of the electric storage water heater. Set to 0 to have this field autosized. Set to -1 to follow 2104 BA House Protocols."  
 	Default Value:		N/A
 
-9) derate_for_cycling_inefficiencies
+6) derate_for_cycling_inefficiencies
 	Required:		Yes
 	Type: 			DoubleArgument
 	Display Name: 		Annual Energy Derate for Cycling Inefficiencies - this factor accounts for the small water draws on the heat exchanger that are not currently reflected
 				in the DOE Energy Factor test procedure. CEC 2008 Title 24 implemented an 8% derate for tankless water heaters.
 	Default Value:		8.8%
 
-10) choice list of fuel_type
+7) choice list of fuel_type
 	Required:		Yes
 	Type: 			StringVector
 	Display Name: 		Type of Fuel Used for Heating
 	Default Value:		Natural Gas				
  
-11) water_Heater_recovery_efficiency 
-	Required:		Yes
-	Type: 			DoubleArgument
-	Display Name: 		Rated Recovery Efficiency of the Water heater equal to the ratio of energy delivered to the water to the energy content of the fuel consumed by the weater heater. 
-				Test procedures to test recovery efficiency are defined by by DOE in 10 CFR Part 430, Appendix E to Subpart B. Enter this number as a percent. 
-				Users will need to review the E+out.eiop file to confirm Calculated recovery efficiency = Rated recovery efficiency.
-	Default Value:		N/A
 
 
 
@@ -117,16 +90,6 @@ If shw_Setpoint_Temperature < 0 then write error message "Hot water temperature 
 If Rated Energy Factor  > 1 then write error message "Rated Energy Factor must be less than 1."
 
 If Rated Energy Factor < 0 and <> -1 then write error message "Rated Energy Factor must be > 0."
-
-If derate_percentage_of_Rated_Energy_Factor > 100 write error message "Derate percentage must be less than 100."
-
-If derate_percentage_of_Rated_Energy_Factor < 0 then write error message "Derate percentage must be >= 0."
-
-If deadband_Temperature_Difference <=0 then write error message "Deadband Temperature Difference must be > 0 deg F."
-
-If Water_Heater_Effectiveness < 0 then write error message "Electric Water Heater Heat Exchange Effectiveness must be > 0."
-
-If Water_Heater_Effectiveness > 1 then write error message "Electric Storage Water Heater Heat Exchange Effectiveness must be < 1."
  
 If Water Heater Nominal Capacity < 0 and <> -1 then write error message "Electric Storage Water Heater Nominal Capacity must be > 0 kW."
 
@@ -151,13 +114,6 @@ If shw_Setpoint_Temperature < 120 F then write warning message""Hot Water Setpoi
 
 If rated_Energy_Factor < 0.68 then write warning message "AHRI Certified Energy Factors for Commercially available Gas Tankless Water Heaters should be 0.68 or greater."
 If rated_Energy_Factor > 0.99 then write warning message "AHRI Certified Energy Factors for Commercially available Gas Tankless Water Heaters should be less that 0.99."
-
-If derate_percentage_of_Rated_Energy_Factor > 15 then write warning message "Parformance degradation factor of <x>% associated with Installed Energy Factor appears to be extreme."
-	
-If deadband_Temperature_Difference > 15 Deg F then write warning message "Deadband Temperature Difference should be < 15 Deg F."
-
-If Water Heater Effectiveness < 0.80 then write warning message "Actual Performance of modeled water heater may not match Rated EF and RE per 
-								GAMA and 10CFR430 test procedures. Check EPlusout.eio file for calcuklated EF and RE."
 
 If Water Heater Nominal Capacity < 74.9 KBtuh then write warning message"Commercially Available Gas Tankless Water Heaters should have a minimum Nominal Capacity of 74.9 KBtuh."
 If Water Heater Nominal Capacity > 199.9 KBtuh then write warning message"Commercially Available Gas Tankless Water Heaters should have a maximum Nominal Capacity of 199 KBtuh."
@@ -341,16 +297,9 @@ If existing plant loop selected
 
 	1) attribute setTankVolume 
 
-		
-		if storage_Tank_Volume = 0 then
-
-			shw_heater.setTankVolume("Autosized").
-
-			write info message of object_to_be_created and shw_heater.storage_Tank_Volume
-
 			else shw_heater.setTankVolume(0.00379)
 			
-			write info message of object_to_be_created and shw_heater.storage_Tank_Volume
+			write info message of shw_heater.SetTankVolume
 
 	2) attribute setSetpointTemperatureSchedule
 
@@ -364,7 +313,7 @@ If existing plant loop selected
  
 	3) attribute setDeadbandTemperatureDifference
 		
-			shw_heater.setDeadbandTemperatureDifference(deadband_Temperature_Difference)
+			shw_heater.setDeadbandTemperatureDifference(0)
 
 			write info message of shw_heater.DeadbandTemperatureDifference
 
@@ -372,7 +321,7 @@ If existing plant loop selected
 
 			write info message of shw_heater.MaximumTemperatureLimit
 	
-	5) attribute shw_heater.setHeaterControlType("Cycle")
+	5) attribute shw_heater.setHeaterControlType("Modulate")
 
 			write info message of shw_heater.HeaterControlType
 
@@ -400,7 +349,7 @@ If existing plant loop selected
 
 	9) attribute shw_heater.setHeaterThermalEfficiency
 
-			= (water_Heater_recovery_efficiency) * (1 - derate_for_cycling_inefficiencies)
+			= (energy_factor) * (1 - derate_for_cycling_inefficiencies)
 
 			write info message of shw_heater.HeaterThermalEfficiency
 
