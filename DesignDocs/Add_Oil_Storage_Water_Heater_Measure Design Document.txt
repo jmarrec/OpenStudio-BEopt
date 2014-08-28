@@ -13,11 +13,9 @@ Tag		Service Hot Water.Water Heating
 
 Description:
 This measure adds an OS:WaterHeater:Mixed object representing an Oil Storage Water Heater. Users will be asked to provide the following arguments
-1) Use case, 2) Plant loop Assignment 3) Number of Bedrooms, 4) Number of Bathrooms, 5) Tank Volume, 6) Energy Factor, 
-8) Water HEater Location 9) Setpoint Temperature Schedule,  11) Water Heater Capacity, 12) Recovery Efficiency 
- 
-#JM: Removed some inputs: derate %, deadband, effectiveness
- 
+1) Use case, 2) Plant loop Assignment 3) Number of Bedrooms 4) Number of Bathrooms 5) Tank Volume 6) Energy Factor 
+7) Water Heater Location 8) Setpoint Temperature Schedule, 9) Water Heater Capacity, 10) Recovery Efficiency  
+
 Model Description:
 The measure will create a new instance of the OS:WaterHeater:Mixed object representing an #1 Oil Storage Water Heater. The object will either be assigned to an existing plant 
 loop or create a new plant loop for assignment. The object will be configured be to use the user arguments. The EIO file will reports industry standard ratings of Recovery Efficiency 
@@ -31,77 +29,70 @@ Arguments:
 
 
 1) 1) Choice list of use_case (Create a  water heater representing B10 Benchmark standard, Create a  water heater representing NCTH standard, Create a  water heater representing BA Pre-Retrofit Case standard, General)
-	Required:		Yes
-	Type: 			StringVector (List of use cases)
+	Required:			Yes
+	Type: 				StringVector (List of use cases)
 	Display Name: 		How will this measure be used?
 	Default Value:		N/A
 	NOTE: This choice will drive lookups into tables defined by 2014 Building America Simulation Protocol. 
 
-2) number_Of_Bedrooms
-	Required:		Yes
-	Type: 			StringVector (1, 2, 3, 4, 5)
-	Display Name: 		Number of Bedrooms in the Reference Home
+2) choice_list of number_Of_Bedrooms
+	Required:			Yes
+	Type: 				StringVector (1, 2, 3, 4, 5)
+	Display Name: 		Number of Bedrooms in the Reference Home. If more than 5 enter 5. 
 	Default Value:		N/A
 
-3) number_Of_Bathrooms
-	Required:		Yes
-	Type: 			StringVector (1, 1.5, 2, 2.5, 3, 3.5 or more) 
-	Display Name: 		Number of Bathrooms in the Reference Home
+3) choice_list number_Of_Bathrooms
+	Required:			Yes
+	Type: 				StringVector (1, 1.5, 2, 2.5, 3, 3.5) 
+	Display Name: 		Number of Bathrooms in the Reference Home. If more than 3.5 enter 3.5.
 	Default Value:		N/A
 		
 4) Choice list of existing_Plant_Loop_name
-	Required:		Yes
-	Type: 			StringVector (List of Plant Loops available in the model)
+	Required:			Yes
+	Type: 				StringVector (List of Plant Loops available in the model)
 	Display Name: 		Plant Loop to assign Water heater as a Supply Equipment
 	Default Value:		N/A
 	NOTE: One choice should be to make a new heating water plant loop object 
 
 5) storage_Tank_Volume
-	Required:		Yes
-	Type: 			DoubleArgument
-	Display Name: 		Volume of the Storage Tank (gallons) of the Oil Storage Water Heater. Set to 0 to have Storage tank volume autosized. Set to -1 to follow 2104 BA House Protocols." 
+	Required:			Yes
+	Type: 				DoubleArgument
+	Display Name: 		Volume of the Storage Tank (gallons) of the Oil Storage Water Heater.  Set to -1 to follow 2104 BA House Protocols." 
 	Default Value:		N/A
 	## NOTE If object_to_be _created <> General this will be required to be a lookup
 
 6) rated_Energy_Factor
-	Required:		Yes
-	Type: 			DoubleArgument
+	Required:			Yes
+	Type: 				DoubleArgument
 	Display Name: 		Rated Energy Factor of Gas Storage Tank Water Heater. This value shoud be entered as a percentage.
 	Default Value:		N/A
 
-8) shw_setpoint_Temperature
-	Required:		Yes
-	Type: 			Double Argument
+7) shw_setpoint_Temperature
+	Required:			Yes
+	Type: 				Double Argument
 	Display Name: 		Hot Water Setpoint Temperature (Deg F).
 	Default Value:		125
 
-10) water_Heater_Effectiveness
-	Required:		Yes
-	Type: 			DoubleArgument
-	Display Name: 		Use-Side and Source-Side Effectiveness - representing heat exchanger efficiency. This number can be tuned to achieve results matching the GAMA rated EF 
-				and RE outputs. Search the E+out.eoi output file to review the results for EF and RE
-	Default Value:		1.0
-
-11) Choice List of water_Heater_Location
-	Required:		Yes
-	Type: 			StringVector (List of Thermal Zones available in Model)
+8) Choice List of water_Heater_Location
+	Required:			Yes
+	Type: 				StringVector (List of Thermal Zones available in Model)
 	Display Name: 		Thermal Zone where the Gas Storage Water Heater is located.
 	Default Value:		N/A
 
-12) water_Heater_Nominal_Capacity
-	Required:		Yes
-	Type: 			DoubleArgument
+9) water_Heater_Nominal_Capacity
+	Required:			Yes
+	Type: 				DoubleArgument
 	Display Name: 		The nominal capacity [MBtu] of the gas storage water heater. Set to 0 to have this field autosized. Set to -1 to follow 2104 BA House Protocols."  
 	Default Value:		N/A
 
-13) water_Heater_recovery_efficiency 
-	Required:		Yes
-	Type: 			DoubleArgument
+10) water_Heater_recovery_efficiency 
+	Required:			Yes
+	Type: 				DoubleArgument
 	Display Name: 		Rated Recovery Efficiency of the Water heater equal to the ratio of energy delivered to the water to the energy content of the fuel consumed by the weater heater. 
-				Test procedures to test recovery efficiency are defined by by DOE in 10 CFR Part 430, Appendix E to Subpart B. Enter this number as a percent. 
-				This input will be used as the thermal efficiency of the heater. Users will need to review the E+out.eiop file to confirm Calculated recovery 
-				efficiency = Rated recovery efficiency.
-	Default Value:		75
+						Test procedures to test recovery efficiency are defined by by DOE in 10 CFR Part 430, Appendix E to Subpart B. Enter this number as a percent. 
+						This input will be used as the thermal efficiency of the heater. Users will need to review the E+out.eiop file to confirm Calculated recovery 
+						efficiency = Rated recovery efficiency.
+	Default Value:		0.75
 
 
 ##Water heater performance data from here: https://www.ahridirectory.org/ahridirectory/pages/rwh/defaultSearch.aspx
@@ -320,19 +311,13 @@ ___________________________________________
 
 		if use_case = NCTH or B10 Benchmark then 
 
-			shw_heater.storage_Tank_Volume = result of lookup of Oil Storage Tank table (#bdr,#bath). ## NOTE Convert to m3 units for assignment) volume should be 0.95*nominal
+			shw_heater.storage_Tank_Volume = result of lookup of Gas Storage Tank table (#bdr,#bath). ## NOTE No table available for Oil, Convert to m3 units for assignment) 
 
 			write info message of use_case and shw_heater.storage_Tank_Volume
 
-		if use_case = BA Retrofit then 
+		if use_case = BA Retrofit or General then 
 
-			shw_heater.storage_Tank_Volume(storage_Tank_Volume), write info message printed of use case and volume
-			
-			write info message of use_case and shw_heater.storage_Tank_Volume
-
-		if use_case = General 
-
-			shw_heater.setTankVolume(storage_Tank_Volume)
+			shw_heater.storage_Tank_Volume(storage_Tank_Volume)
 			
 			write info message of use_case and shw_heater.storage_Tank_Volume
 
@@ -340,7 +325,7 @@ ___________________________________________
 
 		if use_case = NCTH or B10 Benchmark or BA Retrofit then 
 
-			create a use schedule where Tsetpoint = constant 120F schedule (all 8760 hours) 
+			create a use schedule where Tsetpoint = constant 125F schedule (all 8760 hours) 
 
 			assign new use schedule to shw_heater.setpoint_Temperature_Schedule_Name 
 
@@ -359,10 +344,9 @@ ___________________________________________
 			write info message of shw_heater.setpoint_Temperature_Schedule_Name and schedule value			
 			
 
-
-	3) attribute setDeadbandTemperatureDifference
-
-		shw_heater.setDeadbandTemperatureDifference(2) ## Note convert 15F to Celcius)
+	3) attribute setDeadbandTemperatureDifference(2)
+		
+			write info message of shw_heater.DeadbandTemperatureDifference
 
 	4) attribute shw_heater.setMaximumTemperatureLimit(100) ##Note: Input is in Deg C, 212 converted to Deg C for OS assignment.
 
@@ -376,21 +360,15 @@ ___________________________________________
 	
 		if use_case = NCTH or B10 Benchmark then 
 
-			shw_heater.setHeaterMaximumCapacity =  lookup result of lookup of Oil Storage Tank table (#bdr,#bath). ## NOTE units need to be in W
+			shw_heater.setHeaterMaximumCapacity =  lookup result of lookup of Gas Storage Tank table (#bdr,#bath). ## Note no table for gas in document... use non electric table ## NOTE units need to be in W
 
 			write info message of shw_heater.HeaterMaximumCapacity
 
-		if use_case = BA Retrofit then 
+		if use_case = BA Retrofit or General then 
+				
+					shw_heater.setHeaterMaximumCapacity(water_Heater_Nominal_Capacity)
 
-			shw_heater.setHeaterMaximumCapacity(water_Heater_Nominal_Capacity)
-
-			write info message of shw_heater.HeaterMaximumCapacity
-
-		if use_case = General then  
-
-			shw_heater.setHeaterMaximumCapacity(water_Heater_Nominal_Capacity)
-
-			write info message of shw_heater.HeaterMaximumCapacity
+					write info message of shw_heater.HeaterMaximumCapacity
 
 	7) attribute shw_heater.setHeaterMinimumCapacity(0)
 
@@ -400,9 +378,12 @@ ___________________________________________
 
 			write info message of shw_heater.HeaterFuelType
 
-	9) attribute shw_heater.setHeaterThermalEfficiency(eta_c)  #Note Reasonable assumption that Recovery Efficiency ~= Thermal Efficiency, although NOT exact 
-
-		eta_c = recovery_efficiency+UA*(135-67.5)/Rated_input_power
+	9) attribute shw_heater.setHeaterThermalEfficiency
+	
+			eta_c = recovery_efficiency+UA*(135-67.5)/Rated_input_power
+			
+			shw_heater.setHeaterThermalEfficiency(eta_c)
+		
 			write info message of shw_heater.HeaterThermalEfficiency
 
 	10) attribute shw_heater.setPartLoadFactorCurve = OPTIONAL - NOT USED
@@ -431,13 +412,12 @@ ___________________________________________
 
 	21) attribute shw_heater.setOffCycleLossCoefficienttoAmbientTemperature  ##SOurce = Cell R4594, Options Sheet of BA_Analysis_FY10.xlsm spreadsheet
 
-
 		##Note Equation Source = Options tab of BA Analysis Spreadsheet
 		
-		TTank = 135 deg F
+		TTank = 135 F
 		Assume TEnvironment = 67.5 F 
 
-		UA = (recovery_efficiency/energy_factor-1)/((135-67.5)*24/41073-(135-67.5)/(rated_input_power*energy_factor))
+			UA = (recovery_efficiency / energy_factor - 1) / ((135 - 67.5) * 24 / 41073 - (135 - 67.5) / (rated_input_power * energy_factor))
 		
     		## Note: reasonable values of UA should be ~ 10 or less. (UA units should be Btu/hr-F)
 		
