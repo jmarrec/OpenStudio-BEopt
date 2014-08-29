@@ -18,14 +18,14 @@ This measure allows the user to create specify new WaterUseEquipment and WaterUs
 Users can specify the required properties of the OSWaterUse:Equipment objects or specify the creation of objects adherent to the 
 BA Benchmark Home (for new construction). If desired, daily water usage and schedules from the BA House Simulation Protocols 
 can be assigned to the water use objects. Alternatively, a schedule representing constant usage (which can be later modified) can be generated. 
-If an existing hot water loop is chosen, this measure will not alter any supply side equipment used hot water generation, but will only attach 
+If an existing hot water loop is chosen, this measure will not alter any supply side equipment used for hot water generation, but will only attach 
 objects to the demand side of the loop. If the user elects to create a new hot water loop, an 0.59 EF hot water heater representing typical 
 performance will be created and configured. If desired, users will need to manually configure the supply equipment to adhere to BA Benchmark home 
 requirements.
 
 Model Description:
 The measure will ask the user to define all fields associated OS:WaterUseEquipment objects. Users will need to specify the Hot Water Loop 
-to assign the WaterUseEquipment objects to, and will also need to specify the locations and daily draws (gpm) of key residential hot water 
+to assign the WaterUseEquipment objects to, and will also need to specify the locations and daily draws (gpd) of key residential hot water 
 equipment objects. Users will be offered checkboxes, which if selected will create BA Benchmark (New Construction) compliant objects for hot 
 water usage and delivery.
 
@@ -37,11 +37,11 @@ Arguments:
 
 ###showers, baths, sinks, dishwasher, and clothes washer
 
-1) Choice list of existing_hot_water_loops (Plant Loops having type = hot water, to add OS:WaterUseEquipment connections to)
+1) Choice list of existing_hot_water_loops (Plant Loops having type = heating, to add OS:WaterUseEquipment connections to)
 	Display Name:		Hot Water Loop to assign WaterUseEquipment to? 
 	Required:			Yes		## In addition to listing existing hot water loops, the selection should include the ability to create a new hot water loop... 
 	Type:				StringVector
-	Default:			No
+	Default:			N/A
 
 2) Checkbox for using_Standard_DHW_Event_Schedules_and_event_draws (Yes/No) 
 	Display Name:		Check to use the standard SHW Event schedules and event draws from the spreadsheet found in the "Hourly Profiles" tab
@@ -49,12 +49,12 @@ Arguments:
 						gallons per day flow amounts below will be ignored. If this box is not checked, user arguments for gallons per day of 
 						usage will be used, and a schedule of constant hourly usage values (1.0 for each hour) will be created.
 	Required:			Yes
-	Type:				CheckBox
+	Type:				Boolean (CheckBox)
 	Default:			No
 	
 3) Choice List of number_Of_Bedrooms
 	Required:			Yes
-	Type: 				StringVector (1, 2, 3, 4, 5)
+	Type: 				Integer (1, 2, 3, 4, 5)
 	Display Name: 		Number of Bedrooms in the Proposed Home. If more than 5 bedrooms enter 5. 
 	Default Value:		N/A
 
@@ -78,7 +78,7 @@ Arguments:
 	
 7)  Choice List of shower_sink_bath_location
 	Required:			Yes
-	Type: 				StringVector of OS Spaces in the model
+	Type: 				String (created from Vector of names of OS:Space in the model)
 	Display Name: 		Location of Showers, Sinks and Baths?
 	Default Value:		N/A
 
@@ -90,7 +90,7 @@ Arguments:
 	
 9)  Choice List of clothed_washer_location
 	Required:			Yes
-	Type: 				StringVector of OS Spaces in the model
+	Type: 				String (created from Vector of names of OS:Space in the model)
 	Display Name: 		Clothes Washer Location?
 	Default Value:		N/A
 
@@ -102,7 +102,7 @@ Arguments:
 
 11)  Choice List of dishwasher_location
 	Required:			Yes
-	Type: 				StringVector of OS Spaces in the model
+	Type: 				String (created from Vector of names of OS:Space in the model)
 	Display Name: 		Dishwasher Location?
 	Default Value:		N/A
 
@@ -128,6 +128,8 @@ Error Message:
 
 Validate input arguments using standard validation methods 
 
+	
+	
 	If using_Standard_DHW_Event_Schedules_and_event_draws = false 
 			and 
 		gpd of any  object (sink, bath, etc) < 0 
@@ -143,21 +145,21 @@ Validate input arguments using standard validation methods
 		
 	Warning Message:
 
-	Retrieve total number of people in model by summing number of people in each space of the model. Use people method of space object
+	Retrieve total number of people <x> in model by summing number of people in each space of the model. Use people method of space object
 	
-	If clothes_washer_gpd > 11.7 then write warning message "Clothes washer gpd based on <x> number of people and <number_Of_Bedrooms> 
+	If clothes_washer_gpd > 11.7 then write warning message "Clothes washer gpd of <clothes_washer_gpd> based on <x> number of people and <number_Of_Bedrooms> 
 														  number of bedrooms seems excessive.  #Limit based on 12 bdrm usage prediction from BA Spreadsheet
 	
-	If shower_gpd > 70.04 then write warning message "Shower gpd based on <x> number of people and <number_Of_Bedrooms> 
+	If shower_gpd > 70.04 then write warning message "Shower gpd of <shower_gpd> based on <x> number of people and <number_Of_Bedrooms> 
 														  number of bedrooms seems excessive. #Limit based on 12 bdrm usage prediction from BA Spreadsheet
 														  
-	If dishwasher_gpd > 11.26 then write warning message "Dishwasher gpd based on <x> number of people and <number_Of_Bedrooms> 
+	If dishwasher_gpd > 11.26 then write warning message "Dishwasher gpd of <dishwasher_gpd> based on <x> number of people and <number_Of_Bedrooms> 
 														  number of bedrooms seems excessive. #Limit based on 12 bdrm usage prediction from BA Spreadsheet
 														  
-	If bath_gpd > 17.54 then write warning message "Bath gpd based on <x> number of people and <number_Of_Bedrooms> 
+	If bath_gpd > 17.54 then write warning message "Bath gpd based of <bath_gpd> on <x> number of people and <number_Of_Bedrooms> 
 													number of bedrooms seems excessive. #Limit based on 12 bdrm usage prediction from BA Spreadsheet
 												  
-	If sinks_gpd > 62.42 then write warning message "Bath gpd based on <x> number of people and <number_Of_Bedrooms> 
+	If sinks_gpd > 62.42 then write warning message "Bath gpd of <sinks_gpd> based on <x> number of people and <number_Of_Bedrooms> 
 													 number of bedrooms seems excessive. #Limit based on 12 bdrm usage prediction from BA Spreadsheet
 
 	If max_monthly_average_temp > 100 then write warning message "Temperature entered for Maximum Monthly Average seems high. Please check values."
@@ -178,7 +180,7 @@ Info Message:
 
 Not Applicable Message:
 
-	None
+	If model has 0 spaces then write Error message "Model has no spaces. Measure will not run."
 	
 Initial Condition Message:
 
@@ -187,14 +189,9 @@ Initial Condition Message:
 Final Condition Message:
 
 	Model ended with <x> OS:WaterUseConnection objects, <y> OS:WaterUseDefinition objects <z> OS:WaterUseEquipment objects
+
 	#Do this for every type of fixture created. 
-		An OS:WaterUse:Connection object named [WUC NAME] was created with and associated OS:WaterUseDefinition object named [WUD NAME] 
-		with the following properties:
-		Peak Flow Rate - <x> gpm
-		Target Temperature Schedule - Provide name of target temperature schedule
-		Sensible Fraction Schedule - Provide name of Sensible Fraction temperature schedule
-		Latent Fraction Schedule - Provide name of Latent Fraction temperature schedule
-		The OS:WaterUse:Connection object named [WUC NAME] was added to the hot water plant loop named [hot water plant loop name].
+	
 		
 Code Outline:
 
@@ -223,7 +220,7 @@ Code Outline:
 			
 			
 			
-# Step 1 - Create Peak flow objects and unitized (differing monthly) schedule objects for sink, clothes washer, shower, bath and dishwasher
+# Step 1 - Create Peak flow objects and unitized (differing monthly) and flow rate fraction schedule objects for sink, clothes washer, shower, bath and dishwasher
 
 If using_Standard_DHW_Event_Schedules_and_event_draws = true then create a new complex schedule for each equipment type.
 
@@ -248,11 +245,11 @@ If using_Standard_DHW_Event_Schedules_and_event_draws = true then create a new c
 
 		For month = 1 to 12 step 1
 
-			shower_daily_usage(month) = 14.0 + 4.67 * (num_bdr) * MAX((110 - site_water_mains_temp(x)) / (125 - site_water_mains_temp(month)),0) ## Note units = gal per day
+			shower_daily_usage(month) = 14.0 + 4.67 * (num_bdr) * MAX((110 - site_water_mains_temp(month)) / (125 - site_water_mains_temp(month)),0) ## Note units = gal per day
 		
-			sinks_daily_usage(month) = 12.5 + 4.16 * (num_bdr) * MAX((110 - site_water_mains_temp(x)) / (125 - site_water_mains_temp(month)),0) ## Note units = gal per day
+			sinks_daily_usage(month) = 12.5 + 4.16 * (num_bdr) * MAX((110 - site_water_mains_temp(month)) / (125 - site_water_mains_temp(month)),0) ## Note units = gal per day
 			
-			baths_daily_usage(month) = 3.5 + 1.17 * (num_bdr) * MAX((110 - site_water_mains_temp(x)) / (125 - site_water_mains_temp(month)),0) ## Note units = gal per day
+			baths_daily_usage(month) = 3.5 + 1.17 * (num_bdr) * MAX((110 - site_water_mains_temp(month)) / (125 - site_water_mains_temp(month)),0) ## Note units = gal per day
 		
 		next month
 		
@@ -399,13 +396,32 @@ If using_Standard_DHW_Event_Schedules_and_event_draws = true then create a new c
 	
 			For each device, retrieve the peak annual gallon per hour value. Divide all other values (24 x 12) by this value. This will create an array with one value of 1.0
 	
-	Step 1.e - 	For each device, create a new complex schedule (each month will have different values for each of the 24 hours). 
+	Step 1.e - 	For each device , create a new complex schedule (each month will have different values for each of the 24 hours). 
 				The values will be < 1.0 except for one hour of one month.
-
+				
+				## #NOTE SAMPLE SCHEDULE SNIPPET 
+				
+				
+				sink_fraction_flow_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+				sink_fraction_flow_sch.setName("sink_fraction_flow")
+				sink_fraction_flow_sch.defaultDaySchedule().setName("Sink Fraction Flow Default")
+				
+				Create loop 1
+				sink_fraction_flow_sch.defaultDaySchedule().addValue(OpenStudio::Time.new(0,24,0,0),Norm(x, month, hr)
 			
-	Else create a simple schedule for this object which has a value of 1.0 for all hours, all days, 
-
+			##NOTE format OpenStudio::Time.new(1-12,1-24,0,0),Norm(x, month, hr)
 	
+			
+	If using_Standard_DHW_Event_Schedules_and_event_draws = FALSE then create a simple schedule for this object which has a value of 1.0 for all hours, all days, 
+
+## NOTE SEE CODE SNIPPET BELOW FOR CREATING SIMPLE SCHEDULE
+
+							  
+				  sat_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+				  sat_sch.setName("Supply Air Temp")
+				  sat_sch.defaultDaySchedule().setName("Supply Air Temp Default")
+				  sat_sch.defaultDaySchedule().addValue(OpenStudio::Time.new(0,24,0,0),1.0)
+	  	
 	
 	NOTE: Repeat this process for the sink, shower, bath, dish washer and clothes washer objects. Create flow rate fraction schedules for each and 
 			store the peak flow values. 
@@ -418,13 +434,13 @@ If using_Standard_DHW_Event_Schedules_and_event_draws = false then for each devi
 		
 		# 2.a For each device, create a NEW OS:WaterUseEquipmentDefinition object for the device
 			 
-			2.a.1 Assign the peakFlowRate attribute:
+			2.a.1 Set peakFlowRate attribute of this object:
 				
 				if using_Standard_DHW_Event_Schedules_and_event_draws = true 
 				then 
-					Assign the PeakFlowRate attribute from either the equation results (gpd function of # bedrooms transformed into gph)
+					Assign the PeakFlowRate attribute from  the hourly max of the peak array of each device. Note convert to m3/sec for setting
 				else
-					Assign PeakFlowRate attribute = sinks_gpd (direct user argument)
+					Assign PeakFlowRate attribute = sinks_gpd/24 (use direct user argument and convert to m3/sec)
 				
 			2.a.2 Create TargetTemperatureSchedule for the device
 			
@@ -435,7 +451,7 @@ If using_Standard_DHW_Event_Schedules_and_event_draws = false then for each devi
 						If existing_hot_water_loops <> "create new" and no OS:WaterHeaterMixed object exists on the selected loop 
 							then
 							create a new target temperature schedule of 110 Deg F write warning message "No water heater exists in the selected 
-							water loop. A target temperature schedule of 110F has been created and assigned to the Sink"
+							water loop. A target temperature schedule of 110F has been created and assigned to the <clothes washer or dishwasher>."
 			
 					For Showers, Baths and Sink devices, a target temperature schedule of a constant value of 110F will be created. 
 					NOTE: remember to convert the 110 F to C before creating the simple schedule.
@@ -707,6 +723,17 @@ If using_Standard_DHW_Event_Schedules_and_event_draws = false then for each devi
 		
 					apply the OS:WaterUseConnnection objects to the demand side of selected loop. 
 							OS:PlantLoop.addDemandBranchForComponent(water_use_connection_name from step 2.e)
+							
+		3.b.1 Create Info Messages 
+				An OS:WaterUse:Connection object named [WUC NAME] was created with and associated OS:WaterUseDefinition object named [WUD NAME] 
+				with the following properties:
+				Peak Flow Rate - <x> gpm ##Note the object attrribute may be in m3/sec)
+				Target Temperature Schedule - Provide name of target temperature schedule
+				Sensible Fraction Schedule - Provide name of Sensible Fraction temperature schedule
+				Latent Fraction Schedule - Provide name of Latent Fraction temperature schedule
+				The OS:WaterUse:Connection object named [WUC NAME] was added to the hot water plant loop named [hot water plant loop name].
+							
+							
 #_______________________________________________________________
 	List of different attributes for water use equipment types
 	
