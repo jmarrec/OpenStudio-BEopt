@@ -11,6 +11,7 @@ Measure Type: 	ModelMeasure
 
 Tag		Service Water Heating.Distribution
 
+
 Description:
 Hot water distribution systems impact the volume of hot water required to meet the delivered hot water loads at the fixtures, internal heat gain to the building - 
 based on functional relationships described in the "Monthly Profiles" tab of the B10 Analysis New Construction 2011.1.26.xlsx spreadsheet.  NOTE: Users must
@@ -229,11 +230,13 @@ Write Final Condition Message
 
 ## End of measure
 
+
+##NOTE Consider merging this measure with the DHW draw profile measure as the two are tightly coupled to one another. 
 Tests:
 
 Unit testing of code will be developed in as a framework for creating the code. 
 Engineering services will exercise a test model by adding dehumidifiers described in NREL Report "Measured Performance of Residential 
 Dehumidifiers Under Cyclic Operation".
-Engineering services should add and review output varibles for zone level reporting to confirm dehumidifer is correctly operating 
+Engineering services should add and review output varibles for zone level reporting to confirm dehumidifier is correctly operating 
 both for dehumidifier availability and humidity controls while operating. 
 
