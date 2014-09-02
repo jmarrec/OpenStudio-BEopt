@@ -1,0 +1,239 @@
+NREL Measure Design Document Text File
+
+Note: you can include ruby snippets for arguments and messaged, but it isn't necessary. If you are comfortable with it, it makes writing the measure quicker if the code is already structured here.
+
+EnergyPlus 8.1 documentation reference: http://bigladdersoftware.com/epx/docs/8-1/input-output-reference/page-008.html#sitewatermainstemperature
+
+>> Start of XML content
+
+Measure Name: 	Add Service Water Distribution Losses
+Measure Type: 	ModelMeasure
+
+Tag		Service Water Heating.Distribution
+
+Description:
+Hot water distribution systems impact the volume of hot water required to meet the delivered hot water loads at the fixtures, internal heat gain to the building - 
+based on functional relationships described in the "Monthly Profiles" tab of the B10 Analysis New Construction 2011.1.26.xlsx spreadsheet.  NOTE: Users must
+ run the "Add Service Hot Water Draw" measure PRIOR to running this measure. 
+
+Model Description:
+This measure modifies existing OS:Other and OS:WaterUse Definition and Equipment objects, using functional relationships described in the "Monthly Profiles" tab 
+of the B10 Analysis New Construction 2011.1.26.xlsx spreadsheet. Daily internal gain, and water usage amounts are modified based on user arguments.  
+ 
+ OpenStudio Version: 1.4.0		
+
+>> Start of Measure.rb content
+
+Arguments:
+
+1) Checkbox of use_case
+	Required:			Yes
+	Type: 				BooleanArgument (checkbox)
+	Display Name: 		Check this box to create the distribution associated with the Benchmark New Construction Home. See table 13 of the 2014 BA House Simulation 
+						Protocols for details.If this box is checked, arguments for	pipe material, pipe location and recirculation and distribution location type 
+						will be ignored. 
+	Default Value:		None
+	
+2) Choice list of number_of_bedrooms  # Proxy for the number of bathrooms in the home. 	num_bathrooms = (number_of_bedrooms / 2) + 0.5
+	Required:			Yes
+	Type: 				IntegerArgument (1, 2,3, 4, 5)
+	Display Name: 		Number of bedrooms in the home. This variable is used to adjust the internal gains and fixture flows based on domestic hot water distribution 
+						description. If more than 5, enter 5. 
+	Default Value:		None
+
+3) Choice list of distribution_location
+	Required:			Yes
+	Type: 				StringVector (Basement or Interior Space, Attic or Garage)
+	Display Name: 		Primary location of the service hot water distribution piping. 
+	Default Value:		Basement or Interior Space
+	
+4) Choice list of distribution_type
+	Required:			Yes
+	Type: 				StringVector (Home run or Trunk and Branch)
+	Display Name: 		The plumbing layout of the thot ware distribution system. Trunk and branch uses a main trunk branch to supply 
+						various branch take-offs to specific fixtures. In the home run layout, all fixtures are fed from dedicated 
+						piping that runs directly from central manifolds. 
+	Default Value:		Trunk and Branch
+		
+5) Choice list of pipe_material
+	Required:			Yes
+	Type: 				StringVector (Copper or Pex)
+	Display Name: 		The plumbing material
+	Default Value:		Copper
+	
+6) Choice list of recirculation_type
+	Required:			Yes
+	Type: 				StringVector (Demand, Timer or None)
+	Display Name: 		The type of hot water recirculation control, if any. Timer recirculation assumes 16 hrs of daily pump operation (from 0600 to 2200).day 
+						Demand recirculation assumes push button control at all non-appliance fixtures with 100% ideal control (button pushed for every draw event
+						no false signals, and immediate use of hot water when it arrives at the fixture.
+	Default Value:		None
+			
+7) insulation_nominal_r_value
+	Required:			Yes
+	Type: 				DoubleArgument 
+	Display Name: 		Nominal R value for hot water pipe insulation in units of °F-ft2-h/Btu. This variable is used to adjust the internal gains and fixture flows based on domestic hot water distribution 
+						description.
+	Default Value:		0	
+	##NOTE: In this measure, insulation_nominal_r_value will NEVER need be converted into metric units as all equations using insulation_nominal_r_value expect IP units. 
+
+Error Messages:
+If insulation_nominal_r_value > 30 then write error message"Nominal R value of <insulation_nominal_r_value> °F-ft2-h/Btu for hot water pipe insulation is greater than allowed."
+If insulation_nominal_r_value < 0 30 then write error message"Nominal R value for hot water pipe insulation must be is greater or equal to 0."
+
+Warning Messages:
+
+If insulation_nominal_r_value > 20 then write error message"Nominal R value of <insulation_nominal_r_value> °F-ft2-h/Btu for hot water pipe insulation seems excessive."
+
+Not Applicable Messages:
+
+If model has (0) thermal zones then write N/A message 			"Model does not have thermal zones. This measure will not be executed."
+
+If model does not contain ALL (5) water use definitions for sinks, baths, clothes washers, dishwashers and showers (names created per "Add Service Hot Water Draws" 
+measure then write N/A message "User needs to run the "Add Service Hot Water Draws" measure before running this measure. That measure will create objects needed 
+by this measure. 
+
+Initial Conditions:
+
+Examine water use definitions (by name, i,e sink, bath, shower) and report daily usage (gal/day) of the 3 water use definition objects for sinks, baths, showers in the model
+
+Final Condition:
+
+Examine modified water use definitions (by name, i,e sink, shower) and report daily usage (gal/day) of the 3 water use definition objects for sinks, baths, showers in the model
+
+Code Outline:
+
+>> Start of MyMeasure_Test.rb content
+
+# Get arguments from user
+
+# convert argument method variable into run method variables
+
+# test run method variable for error and warning messages
+
+# test model for N/A message
+
+# Write Initial Conditions message
+
+# Convert all input variables collected in IP units into SI equivalents (Fahrenheit to Celsius, etc.)  ##E+ works in SI only##
+
+Step 1 - Check for BS Default setting and reset arguments if appropriate.
+
+If use_case = true then  ## Override argument values
+
+	distribution_location = "Basement or Interior Space"
+	pipe_type = "Copper"
+	insulation_nominal_r_value = 0
+	recirculation_type = None
+
+end if	
+	
+Step 2 - Map user arguments to 1 of 11 possible table sets. 
+
+Given the 4 arguments, 1 (of 11) possible combinations will be chosen. 
+
+Example:
+ 
+	var distribution type: 			Trunk and branch
+	var pipe_type:					Copper
+	var distribution_location		Basement or interior space, 
+	var Recirculation Type:			None	
+
+For whichever (1 of the 11) combinations are mapped to 11 dynamically generated lookup tables.
+
+Each lookup table is a function of the 4 variables, above, and contain 4 unique equations which describes a function of:
+
+	var number_of_bedrooms
+	var insulation_nominal_r_value
+	var month of year (values 1 - 12) 
+	
+The results of the 4 equations produce changes (positive or negative amounts) of (## Note See measure specification companion spreadsheet for equation details) 
+
+	1) additional_interior_heat_gain_btu_per_day 	- will be handled by modifying existing an OS:OtherEquipment object definitions
+	2) change_in_shower_gal_per_day					- will be handled by modification of gal/day used by an existing water use definition object
+	3) change_in_bath_gal_per_day	 				- will be handled by modification of gal/day used by an existing water use definition object
+	4) change_in_sink_gal_pr_day					- will be handled by modification of gal/day used by an existing water use definition object			
+	
+Step 3 - Incorporate calculated changes for additional_interior_heat_gain_btu_per_day to existing OS:OtherEquipmentDefinition and OS:OtherEquipment objects 
+		representing sink, shower and bath water internal gains to the thermal zone. 
+
+	Poll existing OS:OtherEquipmentDefinition objects created as part of "AddServiceHotWaterDraw" and named "Sink..Definition", "Bath..Definition, "Shower..Definition" 
+
+		In an array of (dimensions month_of_year and device) and determine existing Btu/Day of these 3 objects by calculating 
+		Btu/day = Sum (1..24) of OS:OtherEquipmentDefinition.DesignLevel x 24 values found in OS:OtherEquipment(schedule value between 0 and 1).
+		
+		Using the additional_interior_heat_gain_btu_per_day, calculate a modified Btu/day for the 3 objects. Proportion the change (increase or decrease in Btu/day)
+		across the (3) objects in accordance with their original ratios. 
+		
+		Example: For one month (January)
+		
+		Original shower Btu/Day, January gain: 3600 (calculated from data retrieved from existing OS objects) 		
+		Original sink Btu/Day, January gain: 2900	(calculated from data retrieved from existing OS objects) 
+		Original bath Btu/Day, January gain: 5400	(calculated from data retrieved from existing OS objects) 
+		
+		Per Step (2), 	calculate additional_interior_heat_gain_btu_per_day (combined, for all 3 objects) as a function of month, 
+						number_of_bedrooms and insulation_nominal_r_value
+		
+		(additional_interior_heat_gain_btu_per_day, January) = 13723 
+		
+		modified shower Btu/Day, January  gain: 3600 + (3600 / (3600 + 2900 + 5400)) * 13723 = 7751.4
+		modified sink Btu/Day, January gain: 2900 + (2900 / (3600 + 2900 + 5400)) * 13723 = 6244.3
+		modified bath Btu/Day, January gain: 5400 + (5400 / (3600 + 2900 + 5400)) * 13723 = 11627.0
+		
+		Using the code snippets from "AddServiceHotWaterDraw" measure, propagate the change in Btu/Day, January into: 
+		
+		Revised OS:OtherEquppmentDefinition object properties for sink, bath and shower:
+			setDesign Level
+			setFraction Latent
+			
+		Revised OS:OtherEquppment object properties for sink, bath and shower
+			modify existing schedule
+			setSchedule
+
+Step 4 - Incorporate calculated changes for change_in_shower to existing OS:WaterUseDefinition and OS:WaterUseEquipment objects representing shower water usage. 
+		
+		Determine existing gal/day water usage gal/day of these 3 objects
+		
+		Using the change_in_shower_gal_per_day, change_in_bath_gal_per_day and change_in_sink_gal_per_day, calculate a new gal_day for the 3 objects. 
+		
+		Proportion the change (increase or decrease in gal_dayt) to each unique object 
+				
+		Example: For one month (January)
+		
+		Original shower gal/Day, January usage: 34 (calculated from data retrieved from existing OS objects) 		
+		Original sink gal/Day, January usage: 28	(calculated from data retrieved from existing OS objects) 
+		Original bath gal/Day, January usage: 19	(calculated from data retrieved from existing OS objects) 
+		
+		Per Step (2), Calculate change_in_shower_gal_per_day, change_in_bath_gal_per_day, change_in_sink_gal_per_day as a function of month, 
+						number_of_bedrooms and insulation_nominal_r_value
+				
+		(change_in_shower_gal_per_day, January) = 3.1 
+		(change_in_bath_gal_per_day, January) = 2.8
+		(change_in_sink_gal_per_day, January) = 5.2
+		
+		modified shower gal/Day: 34 + 3.1 = 37.1
+		modified bath gal/day = 28 + 2.8 = 30.8
+		modified sink gal/day = 19 + 5.2 = 24.2
+		
+		Using the code snippets from "AddServiceHotWaterDraw" measure, propagate the change in gal/day, January into downstream changes: 
+		
+		Revised OS:WaterEquipmentDefinition object properties for sink, bath and shower:
+			setPeakFlowRate
+			setFraction Latent
+			
+		Revised OS:WaterEquipment object properties for sink, bath and shower
+			modify existing FlowRateFractionSchedule
+			setFlowRateFractionSchedule
+			
+Write Final Condition Message
+
+## End of measure
+
+Tests:
+
+Unit testing of code will be developed in as a framework for creating the code. 
+Engineering services will exercise a test model by adding dehumidifiers described in NREL Report "Measured Performance of Residential 
+Dehumidifiers Under Cyclic Operation".
+Engineering services should add and review output varibles for zone level reporting to confirm dehumidifer is correctly operating 
+both for dehumidifier availability and humidity controls while operating. 
+
