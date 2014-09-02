@@ -1,0 +1,267 @@
+NREL Measure Design Document Text File
+
+Note: you can include ruby snippets for arguments and messaged, but it isn't necessary. If you are comfortable with it, it makes writing the measure quicker if the code is already structured here.
+
+EnergyPlus 8.1 documentation reference: http://bigladdersoftware.com/epx/docs/8-1/input-output-reference/page-008.html#sitewatermainstemperature
+
+>> Start of XML content
+
+Measure Name: 	Add OS:ZoneHVAC:Dehumidifier:DX
+Measure Type: 	ModelMeasure
+
+Tag		HVAC.Cooling
+
+Description:
+This measure allows the user to add an OS:ZoneHVAC:Dehumidifier:DX object to their model. Users will select the thermal zone where
+the dehumidifier will be added. By default, the dehumidifier will be configured to available to operate year round. If, at the time of measure execution, the selected zone
+contains additional conditioning equipment (Other OS:ZoneEquipment objects or is served by an existing OS:AirLoop object) the new dehumidifier will 
+be placed position of lowest cooling priority for equipment staging. In accordance with the published 2014 Building America House Simulation Protocols document, the 
+measure will remove any existing humidistat associated with the zone and add a new humidistat configured to a control to constant 60 RH%. Users will provide the 
+following input describing humidifier performance: 
+1) Location (Thermal Zone) 2) Rated Water Removal Rate (gal/hr) 3) Rated Energy Factor  4) Rated Airflow Rate . Default curves for water removal, energy factor and part load fraction correlations will be used. 
+elect a thermal zone to add a ZoneHVAC:Dehumidifier:DX object to.
+
+
+Model Description:
+This measure will add and configure a OS:ZoneHVAC:Dehumidifier:DX object to the model. Users will select a thermal zone for attaching the 
+OS:ZoneHVAC:Dehumidifier:DX object to. The measure will check to see if an existing ZoneControl:Humidistat object is already assigned to the thermal zone. 
+If so, the measure will remove the existing ZoneControl:Humidistat object, then create and assign a new object having a setpoint of 60%RH (year round). 
+Attributes of the Humidifier which are not user arguments will be set to EnergyPlus defaults. 
+ 
+ OpenStudio Version: 1.5.1		### NOTE OS:ZoneHVAC:Dehumidifier:DX object not expected to be supported in OS V1.5.0 ##
+
+>> Start of Measure.rb content
+
+Arguments:
+
+1) Choice list of existing_thermal_zones
+	Required:			Yes
+	Type: 				StringVector (List of thermal zones available in the model)
+	Display Name: 		Thermal Zone where Dehumidifier will be located.
+	Default Value:		N/A
+	
+2) rated_water_removal_rate
+	Required:			Yes
+	Type: 				DoubleArgument
+	Display Name: 		Full load water removal rate (pints / day) at rated air flow rate and conditions (air entering the dehumidifier 80°F dry-bulb and 60% relative humidity). 
+						Default Value:		N/A
+	
+3) rated_energy_factor
+	Required:			Yes
+	Type: 				DoubleArgument
+	Display Name: 		Energy factor (Litres/kWh) at rated conditions (air entering the dehumidifier at 80°F dry-bulb and 60% relative humidity, and air flow rate”. 
+						Enter -1 to use EnergyStar criteria for Energy Factor.
+	Default Value:		N/A
+	setting 
+	
+4) rated_airflow_rate
+	Required:			Yes
+	Type: 				DoubleArgument
+	Display Name: 		Dehumidifier airflow rate (cfm) at rated conditions (air entering the dehumidifier at 80°F dry-bulb and 60% relative humidity. 
+						Enter -1 to have airflow rate a function of water removal rate (2.75 cfm/pint/day).
+	Default Value:		N/A
+
+Error Messages:
+
+If rated_water_removal_rate <= 0 then write Error message "Dehumidifier rated water removal rate must be > 0 pints/day."
+
+
+If rated_energy_factor <= 0 then write Error message "Rated Energy Factor of Dehumidifier must be > 0 Litres/kWh."
+## Note: trap for potential value of -1
+		
+If rated_airflow_rate <= 0 then write Error message "Rated Airflow Rate of Dehumidifier must be > 0 cfm."
+## Note: trap for potential value of -1
+
+Warning Messages:
+
+If rated_water_removal_rate < 25 then write Warning message 	"A residential dehumidifier having a water removal rate < 25 pints per day is suspect. 
+																Please confirm input."
+
+If rated_water_removal_rate > 200 then write Warning message 	"A residential dehumidifier having a water removal rate > 200 pints per day is suspect. 
+																Please confirm input."
+
+If rated_energy_factor > 4.0 then write Warning message 		"A residential dehumidifier having a Rated Energy Factor > 4.0 Litres/kWh is suspect. 
+																Please confirm input."
+## Note: trap for potential value of -1
+
+If rated_energy_factor < 1.0 then write Warning message 		"A residential dehumidifier having a Rated Energy Factor < 1.0 Litres/kWh is suspect. 
+																Please confirm input."
+## Note: trap for potential value of -1
+
+If rated_airflow_rate > 500 then write Warning message 			"A residential dehumidifier having a rated airflow rate > 500 cfm is suspect. 
+																Please confirm input."
+
+If rated_airflow_rate < 100 then write Warning message 			"A residential dehumidifier having a rated airflow rate < 100 cfm is suspect. 
+																Please confirm input."
+
+Not Applicable Messages:
+
+If model has (0) thermal zones then write N/A message 			"Model does not have thermal zones. This measure will not be executed."
+
+Initial Conditions:
+
+Report count of existing OS:ZoneHVAC:Dehumidifier:DX objects prior to running the measure. Report Size (gal) and nominal Capacity (W) of each object.
+
+Final Condition:
+
+Report the name of OS:ZoneHVAC:Dehumidifier:DX objects and the thermal zone the object was added to. 
+
+If a ZoneControl:Humidistat object was removed from the thermal zone controls, report the name of the object removed, as well as the name of 
+new ZoneControl:Humidistat object added. 
+
+Code Outline:
+
+
+>> Start of MyMeasure_Test.rb content
+
+# Get arguments from user
+
+# convert argument method variable into run method variables
+
+# test run method variable for warning messages
+
+# test model for N/A message
+
+# Write Initial Conditions message
+
+# Convert all input variables collected in IP units into SI equivalents (Fahrenheit to Celsius, etc.)  ##E+ works in SI only##
+
+Step 1 - check for 'autosized' energy factor argument
+
+		If rated_energy_factor = -1 then use table to set rated_energy_factor as a function of rated_water_removal_rate
+
+				rated_water_removal_rate (pints/day)			 rated_energy_factor  ## Table provided by Jeff @ NREL
+						<25                  							    1.2
+						25-35                     							1.4
+						5-45                     							1.5
+						45-54                     							1.6
+						54-75                     							1.8
+						>75                       							2.5
+
+Step 2 - Check for autosized airflow rate argument
+
+		If rated_airflow_rate = -1 then rated_airflow_rate =  rated_water_removal_rate * 2.75   ## Equation provided by Jeff @ NREL
+
+Step 3 - Get thermal zone described by argument
+	
+		1.a - Determine if other zone equipment or air loop equipment have already assigned to this zone (check ZoneHVAC:EquipmentList object to see if there is anything there.)
+		
+
+Step 4 - Create new OS:ZoneHVAC:Dehumidifier:DX object 
+
+			humidifier = ZoneHVACDehumidifierDX.new
+
+Step 5 - Create 'default' curve for water removal rate  ##NOTE values come from curves generated by BeOpt
+
+			water_removal_rate_curve = OpenStudio::Model::CurveBiquadratic.new(model)
+			water_removal_rate_curve.setCoefficient1Constant(-1.162525707)
+			water_removal_rate_curve.setCoefficient2x(0.02271469)
+			water_removal_rate_curve.setCoefficient3xPOW2(-0.000113208)
+			water_removal_rate_curve.setCoefficient4y(0.021110538)
+			water_removal_rate_curve.setCoefficient5yPOW2(-0.0000693034)
+			water_removal_rate_curve.setCoefficient6xTIMESY(0.000378843)
+			water_removal_rate_curve.setMinimumValueofx(-100)
+			water_removal_rate_curve.setMaximumValueofx(100)
+			water_removal_rate_curve.setMinimumValueofy(-100)
+			water_removal_rate_curve.setMaximumValueofy(100)
+  
+ Step 6 - Create 'default' curve for energy factor ##NOTE values come from curves generated by BeOpt
+ 
+			energy_factor_curve = OpenStudio::Model::CurveBiquadratic.new(model)
+			energy_factor_curve.setCoefficient1Constant(-1.902154518)
+			energy_factor_curve.setCoefficient2x(0.063466565)
+			energy_factor_curve.setCoefficient3xPOW2(-0.000622839)
+			energy_factor_curve.setCoefficient4y(0.039540407)
+			energy_factor_curve.setCoefficient5yPOW2(-0.000125637)
+			energy_factor_curve.setCoefficient6xTIMESY(-0.000176722)
+			energy_factor_curve.setMinimumValueofx(-100)
+			energy_factor_curve.setMaximumValueofx(100)
+			energy_factor_curve.setMinimumValueofy(-100)
+			energy_factor_curve.setMaximumValueofy(100)
+  
+ Step 7 - Create 'default' curve for part load fraction correlation ##NOTE values come from curves generated by BeOpt
+			 
+			part_load_fraction_correction_curve = OpenStudio::Model::CurveQuadratic.new(model)
+			part_load_fraction_correction_curve.setCoefficient1Constant(0.9)
+			part_load_fraction_correction_curve.setCoefficient2x(0.1)
+			part_load_fraction_correction_curve.setCoefficient3xPOW2(0)
+			part_load_fraction_correction_curve.setMinimumValueofx(0)
+			part_load_fraction_correction_curve.setMaximumValueofx(1.0)
+			part_load_fraction_correction_curve.setMinimumValueofy(0.7)
+			part_load_fraction_correction_curve.setMaximumValueofy(1.0)
+
+ Step 8 -  Configure the OS:ZoneHVAC:Dehumidifier:DX object 
+ 
+		setAvailability schedule: BLANK  				## Note if  this field is left blank, the schedule has a value of 1 for all time periods.)
+ 
+		setRatedWaterRemoval(rated_water_removal_rate)  ## Note convert into units of Litres per day before assigning
+
+		setRatedEnergyFactor(rated_energy_factor)   	## Note no unit conversion needed - already litres per day 
+		
+		setRatedAirflowRate(rated_airflow_rate)   		## Note convert into units of meters3 / sec) before assigning
+  
+		setWaterRemovalCurveName(water_removal_rate_curve)
+		
+		setEnergyFactorCurveName(energy_factor_curve)
+		
+		setPartLoadCorrelationCurveName(part_load_fraction_correction_curve)
+		
+		setMinimumDryBublTemperatureForDehumidificationOperation(10) 	## Note units are degrees C, hard-coding value to idd default.
+		
+		setMaximumDryBublTemperatureForDehumidificationOperation(35) 	## Note units are degrees C, hard-coding value to idd default.
+		
+		setOffCycleParasiticElectricLoad(0)								## Note 0 is the idd default value.
+
+		setCondensateCollectionWaterStorageTankName()  					## Note blank. 
+	
+Step 9 - Create schedule representing dehumidification setpoint of 60% RH for all 8760 hours
+		
+			## Making schedule type limits
+				DehumidificationScheduleTypeLimits = OpenStudio::Model::ScheduleTypeLimits.new(model)
+				DehumidificationScheduleTypeLimits.setName("Dehumidification Setpoint Schedule Type Limits")
+				DehumidificationScheduleTypeLimits.setLowerLimitValue(0.0)
+				DehumidificationScheduleTypeLimits.setUpperLimitValue(100.0)
+				DehumidificationScheduleTypeLimits.setNumericType("Continuous")
+			
+			##Create a simple schedule
+				default_dehumidification_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+				default_dehumidification_sch.setName("Dehumidification Setpoint - 60% RH Default")
+				default_dehumidification_sch.defaultDaySchedule().setName("Dehumidification Setpoint - 60% RH Default") 
+				default_dehumidification_sch.defaultDaySchedule().addValue(OpenStudio::Time.new(0,24,0,0),60)
+				default_dehumidification_sch.setScheduleTypeLimits(scheduleTypeLimitsMap["Dehumidification Setpoint"])  
+	
+Step 10 - Create new OS:ZoneControlHumidistat object and assign the schedule default_dehumidification_sch 
+				
+				See if existing_thermal_zones has as existing humidistat object already assigned - 
+				
+					if yes - remove the object it, and create a new one 
+					
+					If no, create a new one	
+					
+				Create new humidistat object
+					humidistat = OS:ZoneControlHumidistat.new
+					
+				Set RH schedule to humidistat object
+					setDehumidifyingRelativeHumiditySetpointSchedule(default_dehumidification_sch)
+					
+				Assign OS:ZoneControlHumidistat object to the Thermal Zone
+					existing_thermal_zones.setzoneControlHumidistat(humidistat)
+					
+Step 11 - Assign OS:ZoneHVAC:Dehumidifier:DX object to the thermal zone and set cooling priority
+
+				Assign OS:ZoneHVAC:Dehumidifier:DX object to Thermal Zone and set cooling priority to last 
+				Check to see if existing thermostats are assigned to the Thermal zone
+					existing_thermal_zones.addEquipment(humidifier)
+					existing_thermal_zones.setCoolingPriority(count of zone equip objects attached to this zone)
+				
+## End of measure
+
+
+Tests:
+
+Unit testing of code will be developed in as a framework for creating the code. 
+Engineering services will exercise a test model by adding dehumidifiers described in NREL Report "Measured Performance of Residential 
+Dehumidifiers Under Cyclic Operation".
+Engineering services should add and review output varibles for zone level reporting to confirm dehumidifer is correctly operating 
+both for dehumidifier availability and humidity controls while operating. 
+
