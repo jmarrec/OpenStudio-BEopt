@@ -41,7 +41,7 @@ Arguments:
 2) rated_Energy_Factor
 	Required:		Yes
 	Type: 			DoubleArgument
-	Display Name: 		Rated Energy Factor of Electric Storage Tank Water Heater
+	Display Name: 		Rated Energy Factor of gas tankless Water Heater
 	Default Value:		N/A
 
 3) shw_Setpoint_Temperature
@@ -53,13 +53,13 @@ Arguments:
 4) Choice List of water_Heater_Location
 	Required:			Yes
 	Type: 				StringVector (List of Thermal Zones available in Model)
-	Display Name: 		Thermal Zone where the Electric Storage Water Heater is located.
+	Display Name: 		Thermal Zone where the gas tankless Water Heater is located.
 	Default Value:		N/A
 
 5) water_Heater_Nominal_Capacity
 	Required:			Yes
 	Type: 				DoubleArgument
-	Display Name: 		The nominal capacity [W] of the electric storage water heater. Set to -1 to follow 2104 BA House Protocols."  
+	Display Name: 		The nominal capacity [W] of the natural gas tankless water heater. Set to 0 to autosize."  
 	Default Value:		N/A
 
 6) choice list of fuel_type
@@ -90,7 +90,7 @@ If Rated Energy Factor  > 1 then write error message "Rated Energy Factor must b
 
 If Rated Energy Factor < 0 and <> -1 then write error message "Rated Energy Factor must be > 0."
  
-If Water Heater Nominal Capacity < 0 and <> -1 then write error message "Electric Storage Water Heater Nominal Capacity must be > 0 kW."
+If Water Heater Nominal Capacity < 0 and <> -1 then write error message "Gas Tankless Water Heater Nominal Capacity must be > 0 kW."
 
 If derate_for_cycling_inefficiencies < 0 then write error message "Derate for cycling inefficiencies should be greater than 0."
 
