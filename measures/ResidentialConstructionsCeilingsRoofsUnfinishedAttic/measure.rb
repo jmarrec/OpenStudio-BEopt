@@ -199,9 +199,7 @@ class ProcessConstructionsCeilingsRoofsUnfinishedAttic < OpenStudio::Measure::Mo
     
     # -------------------------------
     # Process the attic ceiling
-    # -------------------------------
-
-    mat_film_roof = Material.AirFilmRoof(Geometry.calculate_avg_roof_pitch(spaces))
+    # ------------------------------- 
 
     if not ceiling_surfaces.empty?
 
@@ -253,6 +251,8 @@ class ProcessConstructionsCeilingsRoofsUnfinishedAttic < OpenStudio::Measure::Mo
     # -------------------------------
     # Process the attic roof
     # -------------------------------
+    
+    mat_film_roof = Material.AirFilmRoof(Geometry.calculate_avg_roof_pitch(spaces))
     
     if not roof_surfaces.empty?
         # Define materials
