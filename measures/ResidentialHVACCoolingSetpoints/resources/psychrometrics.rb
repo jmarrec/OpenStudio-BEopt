@@ -74,7 +74,7 @@ class Psychrometrics
     # If below freezing, calculate saturation pressure over ice
     if t_abs < t_frz_abs
       psat = Math.exp(c1 / t_abs + c2 + t_abs * (c3 + t_abs * (c4 + t_abs * (c5 + c6 * t_abs))) + c7 * Math.log(t_abs))
-    # If above freezing, calculate saturation pressure over liquid water
+      # If above freezing, calculate saturation pressure over liquid water
     elsif
       psat = Math.exp(c8 / t_abs + c9 + t_abs * (c10 + t_abs * (c11 + c12 * t_abs)) + c13 * Math.log(t_abs))
     end
@@ -113,23 +113,23 @@ class Psychrometrics
 
     for i in 1..itmax
 
-        error = p - self.Psat_fT(tsat) # (psia)
+      error = p - self.Psat_fT(tsat) # (psia)
 
-        tsat,cvg,tsat1,error1,tsat2,error2 = MathTools.Iterate(tsat,error,tsat1,error1,tsat2,error2,i,cvg)
+      tsat,cvg,tsat1,error1,tsat2,error2 = MathTools.Iterate(tsat,error,tsat1,error1,tsat2,error2,i,cvg)
 
-        if cvg
-            break
-        end
-        
+      if cvg
+        break
+      end
+
     end
 
     if not cvg
-        puts 'Warning: Tsat_fP failed to converge'
+      puts 'Warning: Tsat_fP failed to converge'
     end
 
     return tsat
   end
-  
+
   def self.Tsat_fh_P(h, p)
     '''
     Description:
@@ -164,23 +164,23 @@ class Psychrometrics
 
     for i in 1..itmax
 
-        error = h - self.hsat_fT_P(tdb,p) # (Btu/lbm)
+      error = h - self.hsat_fT_P(tdb,p) # (Btu/lbm)
 
-        tdb,cvg,tdb1,error1,tdb2,error2 = MathTools.Iterate(tdb,error,tdb1,error1,tdb2,error2,i,cvg)
+      tdb,cvg,tdb1,error1,tdb2,error2 = MathTools.Iterate(tdb,error,tdb1,error1,tdb2,error2,i,cvg)
 
-        if cvg
-            break
-        end
-        
+      if cvg
+        break
+      end
+
     end
 
     if not cvg
-        puts 'Warning: Tsat_fh_P failed to converge'
+      puts 'Warning: Tsat_fh_P failed to converge'
     end
 
     return tdb
   end
-  
+
   def self.rhoD_fT_w_P(tdb, w, p)
     '''
     Description:
@@ -323,30 +323,30 @@ class Psychrometrics
 
     for i in 1..itmax
 
-        psat_star = self.Psat_fT(twb) # (psia)
-        w_star = self.w_fP(p,psat_star) # (lbm/lbm)
-        w_new = ((Liquid.H2O_l.h_fg - (Liquid.H2O_l.cp - Gas.H2O_v.cp)*twb)*w_star - Gas.Air.cp*(tdb - twb))/(Liquid.H2O_l.h_fg + Gas.H2O_v.cp*tdb - Liquid.H2O_l.cp*twb) # (lbm/lbm)
+      psat_star = self.Psat_fT(twb) # (psia)
+      w_star = self.w_fP(p,psat_star) # (lbm/lbm)
+      w_new = ((Liquid.H2O_l.h_fg - (Liquid.H2O_l.cp - Gas.H2O_v.cp)*twb)*w_star - Gas.Air.cp*(tdb - twb))/(Liquid.H2O_l.h_fg + Gas.H2O_v.cp*tdb - Liquid.H2O_l.cp*twb) # (lbm/lbm)
 
-        error = w - w_new
+      error = w - w_new
 
-        twb,cvg,twb1,error1,twb2,error2 = MathTools.Iterate(twb,error,twb1,error1,twb2,error2,i,cvg)
+      twb,cvg,twb1,error1,twb2,error2 = MathTools.Iterate(twb,error,twb1,error1,twb2,error2,i,cvg)
 
-        if cvg
-            break
-        end
+      if cvg
+        break
+      end
     end
 
     if not cvg
-        puts 'Warning: Twb_fT_w_P failed to converge'
+      puts 'Warning: Twb_fT_w_P failed to converge'
     end
 
     if twb > tdb
-        twb = tdb # (degF)
+      twb = tdb # (degF)
     end
 
     return twb
   end
-  
+
   def self.w_fP(p, pw)
     '''
     Description:
@@ -394,15 +394,15 @@ class Psychrometrics
     --------
         Ao    float    Coil Ao Factor
     '''
-    
+
     bf = self.CoilBypassFactor(dBin, wBin, p, qdot, cfm, shr)        
     mfr = UnitConversion.lbm_min2kg_s(self.CalculateMassflowRate(dBin, wBin, p, cfm))
-    
+
     ntu = -1.0 * Math.log(bf)
     ao = ntu * mfr
     return ao
   end
-  
+
   def self.CoilBypassFactor(dBin, wBin, p, qdot, cfm, shr)
     '''
     Description:
@@ -427,13 +427,13 @@ class Psychrometrics
     --------
         CBF    float    Coil Bypass Factor
     '''
-        
+
     mfr = UnitConversion.lbm_min2kg_s(self.CalculateMassflowRate(dBin, wBin, p, cfm))
 
     tin = OpenStudio::convert(dBin,"F","C").get
     win = self.w_fT_Twb_P(dBin, wBin, p)
     p = OpenStudio::convert(p,"psi","kPa").get
-                    
+
     dH = OpenStudio::convert(qdot,"kBtu/h","W").get / mfr
     hin = self.h_fT_w_SI(tin, win)
     h_Tin_Wout = hin - (1-shr)*dH
@@ -442,59 +442,59 @@ class Psychrometrics
     hout = hin - dH
     tout = self.T_fw_h_SI(wout, hout)                    
     rH_out = self.R_fT_w_P_SI(tout, wout, p)
-    
+
     if rH_out > 1
-        puts 'Error: Conditions passed to CoilBypassFactor result in outlet RH > 100%'
+      puts 'Error: Conditions passed to CoilBypassFactor result in outlet RH > 100%'
     end
-                
+
     dT = tin - tout   
     m_c = dW / dT        
-    
+
     t_ADP = self.Tdp_fP_w_SI(p, wout)  # Initial guess for iteration
-    
+
     if shr == 1           
-        w_ADP = self.w_fT_Twb_P_SI(t_ADP, t_ADP, p)
-        h_ADP = self.h_fT_w_SI(t_ADP, w_ADP)
-        bF = (hout - h_ADP) / (hin - h_ADP)
-        return [bF, 0.01].max
+      w_ADP = self.w_fT_Twb_P_SI(t_ADP, t_ADP, p)
+      h_ADP = self.h_fT_w_SI(t_ADP, w_ADP)
+      bF = (hout - h_ADP) / (hin - h_ADP)
+      return [bF, 0.01].max
     end
-    
+
     cnt = 0
     tol = 1.0
     errorLast = 100
     d_T_ADP = 5.0
-    
-    while cnt < 100 and tol > 0.001       
-        # for i in range(1,itmax+1):
-                    
-        if cnt > 0
-            t_ADP = t_ADP + d_T_ADP
-        end
-        
-        w_ADP = self.w_fT_Twb_P_SI(t_ADP, t_ADP, p)
-       
-        m = (win - w_ADP) / (tin - t_ADP)
-        error = (m - m_c) / m_c
 
-        if error > 0 and errorLast < 0
-            d_T_ADP = -1.0*d_T_ADP/2.0
-        end
-        
-        if error < 0 and errorLast > 0
-            d_T_ADP = -1.0*d_T_ADP/2.0
-        end
-       
-        errorLast = error
-        tol = error.abs.to_f
-        cnt = cnt + 1
+    while cnt < 100 and tol > 0.001       
+      # for i in range(1,itmax+1):
+
+      if cnt > 0
+        t_ADP = t_ADP + d_T_ADP
+      end
+
+      w_ADP = self.w_fT_Twb_P_SI(t_ADP, t_ADP, p)
+
+      m = (win - w_ADP) / (tin - t_ADP)
+      error = (m - m_c) / m_c
+
+      if error > 0 and errorLast < 0
+        d_T_ADP = -1.0*d_T_ADP/2.0
+      end
+
+      if error < 0 and errorLast > 0
+        d_T_ADP = -1.0*d_T_ADP/2.0
+      end
+
+      errorLast = error
+      tol = error.abs.to_f
+      cnt = cnt + 1
     end        
 
     h_ADP = self.h_fT_w_SI(t_ADP, w_ADP)
-    
+
     bF = (hout - h_ADP) / (hin - h_ADP)
     return [bF, 0.01].max
   end
-  
+
   def self.CalculateMassflowRate(dBin, wBin, p, cfm)
     '''
     Description:
@@ -503,7 +503,7 @@ class Psychrometrics
 
     Source:
     -------
-        
+
 
     Inputs:
     -------
@@ -541,11 +541,11 @@ class Psychrometrics
     --------
         T       float      drybulb temperature  (degC)
     '''        
-                        
+
     t = (h/1000 - w*2501) / (1.006 + w*1.86)            
     return t
   end        
-  
+
   def self.R_fT_w_P_SI(tdb, w, p)
     '''
     Description:
@@ -569,7 +569,7 @@ class Psychrometrics
     '''
     return self.R_fT_w_P(OpenStudio::convert(tdb,"C","F").get, w, OpenStudio::convert(p,"kPa","psi").get)     
   end
-  
+
   def self.Tdp_fP_w_SI(p, w)
     '''
     Description:
@@ -598,7 +598,7 @@ class Psychrometrics
     '''
     return OpenStudio::convert(self.Tdp_fP_w(OpenStudio::convert(p,"kPa","psi").get, w),"F","C").get
   end        
-  
+
   def self.w_fT_Twb_P_SI(tdb, twb, p)
     '''
     Description:
@@ -620,10 +620,10 @@ class Psychrometrics
     --------
         w       float      humidity ratio        (g/g)
     '''
-        
+
     return self.w_fT_Twb_P(OpenStudio::convert(tdb,"C","F").get, OpenStudio::convert(twb,"C","F").get, OpenStudio::convert(p,"kPa","psi").get)      
   end        
-  
+
   def self.w_fT_Twb_P(tdb, twb, p)
     '''
     Description:
@@ -651,7 +651,7 @@ class Psychrometrics
 
     return w
   end        
-  
+
   def self.R_fT_w_P(tdb, w, p)
     '''
     Description:
@@ -677,7 +677,7 @@ class Psychrometrics
     r = pw/self.Psat_fT(tdb)
     return r
   end        
-  
+
   def self.Pw_fP_w(p, w)
     '''
     Description:
@@ -702,7 +702,7 @@ class Psychrometrics
     pw = p*w/(Gas.PsychMassRat + w)
     return pw
   end        
-    
+
   def self.Tdp_fP_w(p, w)
     '''
     Description:
@@ -734,36 +734,36 @@ class Psychrometrics
 
     if calcMethod == 1
 
-        c14 = 100.45
-        c15 = 33.193
-        c16 = 2.319
-        c17 = 0.17074
-        c18 = 1.2063
+      c14 = 100.45
+      c15 = 33.193
+      c16 = 2.319
+      c17 = 0.17074
+      c18 = 1.2063
 
-        pw = self.Pw_fP_w(p,w) # (psia)
-        alpha = Math.log(pw)
-        tdp1 = c14 + c15*alpha + c16*alpha**2 + c17*alpha**3 + c18*pw**0.1984
-        tdp2 = 90.12 + 26.142*alpha + 0.8927*alpha**2
-        if tdp1 >= Liquid.H2O_l.t_frz
-            tdp = tdp1
-        else
-            tdp = tdp2
-        end
+      pw = self.Pw_fP_w(p,w) # (psia)
+      alpha = Math.log(pw)
+      tdp1 = c14 + c15*alpha + c16*alpha**2 + c17*alpha**3 + c18*pw**0.1984
+      tdp2 = 90.12 + 26.142*alpha + 0.8927*alpha**2
+      if tdp1 >= Liquid.H2O_l.t_frz
+        tdp = tdp1
+      else
+        tdp = tdp2
+      end
 
     else
 
-        # based on DEWPOINT f77 code in ResAC (Brandemuehl)
-        if w < Constants.small
-            tdp = -999.0
-        else
-            pw = self.Pw_fP_w(p,w)
-            tdp = self.Tsat_fP(pw)
-        end
-            
+      # based on DEWPOINT f77 code in ResAC (Brandemuehl)
+      if w < Constants.small
+        tdp = -999.0
+      else
+        pw = self.Pw_fP_w(p,w)
+        tdp = self.Tsat_fP(pw)
+      end
+
     end
     return tdp
   end        
-  
+
   def self.CalculateSHR(dBin, wBin, p, q, cfm, ao)
     '''
     Description:
@@ -787,20 +787,20 @@ class Psychrometrics
     --------
         SHR    float    Sensible Heat Ratio
     '''
-        
+
     mfr = UnitConversion.lbm_min2kg_s(self.CalculateMassflowRate(dBin, wBin, p, cfm))
     bf = Math.exp(-1.0*ao/mfr)
-    
+
     win = self.w_fT_Twb_P(dBin, wBin, p)
     p = OpenStudio::convert(p,"psi","kPa").get
     tin = OpenStudio::convert(dBin,"F","C").get
     hin = self.h_fT_w_SI(tin, win)
     dH = OpenStudio::convert(q,"kBtu/h","W").get / mfr
     h_ADP = hin - dH / (1-bf)
-    
+
     # T_ADP = self.Tsat_fh_P_SI(H_ADP, P)
     # W_ADP = self.w_fT_h_SI(T_ADP, H_ADP)
-    
+
     # Initialize
     t_ADP = self.Tdp_fP_w_SI(p, win)
     t_ADP_1 = t_ADP # (degC)
@@ -815,30 +815,30 @@ class Psychrometrics
 
     (1...itmax+1).each do |i|
 
-        w_ADP = self.w_fT_R_P_SI(t_ADP, 1.0, p)    
-        error = h_ADP - self.h_fT_w_SI(t_ADP, w_ADP)
+      w_ADP = self.w_fT_R_P_SI(t_ADP, 1.0, p)    
+      error = h_ADP - self.h_fT_w_SI(t_ADP, w_ADP)
 
-        t_ADP,cvg,t_ADP_1,error1,t_ADP_2,error2 = MathTools.Iterate(t_ADP,error,t_ADP_1,error1,t_ADP_2,error2,i,cvg)
+      t_ADP,cvg,t_ADP_1,error1,t_ADP_2,error2 = MathTools.Iterate(t_ADP,error,t_ADP_1,error1,t_ADP_2,error2,i,cvg)
 
-        if cvg
-            break
-        end
+      if cvg
+        break
+      end
     end
 
     if not cvg
-        puts 'Warning: Tsat_fh_P failed to converge'        
+      puts 'Warning: Tsat_fh_P failed to converge'        
     end
-    
+
     h_Tin_Wadp = self.h_fT_w_SI(tin, w_ADP)
-    
+
     if (hin - h_ADP != 0)
-        shr = [(h_Tin_Wadp-h_ADP) / (hin - h_ADP),1.0].min
+      shr = [(h_Tin_Wadp-h_ADP) / (hin - h_ADP),1.0].min
     else
-        shr = 1
+      shr = 1
     end        
     return shr
   end        
-    
+
   def self.w_fT_R_P(tdb, r, p)
     '''
     Description:
@@ -863,10 +863,10 @@ class Psychrometrics
     pws = self.Psat_fT(tdb)
     pw = r * pws
     w = 0.62198 * pw / (p - pw)
-       
+
     return w
   end
-    
+
   def self.w_fT_R_P_SI(tdb, r, p)
     '''
     Description:
@@ -920,5 +920,5 @@ class Psychrometrics
     twb = self.Twb_fT_w_P(tdb, w, p)
     return twb
   end
-    
+
 end

@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>process_dehumidifier</name>
   <uid>f2d9e1e8-17bd-4a4a-a46b-df5f7e54e6c3</uid>
-  <version_id>0a489b84-fabf-4e75-9afa-5799dddefb39</version_id>
-  <version_modified>20170526T180651Z</version_modified>
+  <version_id>acee4bc2-e938-48fa-b5be-f0a8902fcf46</version_id>
+  <version_modified>20170531T100939Z</version_modified>
   <xml_checksum>D48F381B</xml_checksum>
   <class_name>ProcessDehumidifier</class_name>
   <display_name>Set Residential Dehumidifier</display_name>
@@ -80,12 +80,6 @@
   </attributes>
   <files>
     <file>
-      <filename>unit_conversions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DCB12FCF</checksum>
-    </file>
-    <file>
       <filename>process_dehumidifier_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -101,12 +95,6 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>463BF809</checksum>
-    </file>
-    <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>31FE0BE6</checksum>
     </file>
     <file>
       <filename>MF_8units_1story_SL_Denver.osm</filename>
@@ -133,10 +121,22 @@
       <checksum>27544F71</checksum>
     </file>
     <file>
+      <filename>unit_conversions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>0CC2772E</checksum>
+    </file>
+    <file>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2A20C3F6</checksum>
+    </file>
+    <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BB1957EF</checksum>
+      <checksum>B0BC3641</checksum>
     </file>
   </files>
 </measure>
