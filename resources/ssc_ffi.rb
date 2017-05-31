@@ -4,9 +4,9 @@ require 'ffi'
 module SscApi
 
   class SscFfi
-  
+
     extend FFI::Library
-    
+
     ssc_path = nil
     if /win/.match(RUBY_PLATFORM) or /mingw/.match(RUBY_PLATFORM)
       if RUBY_PLATFORM.include? "x64"
@@ -19,7 +19,7 @@ module SscApi
     elsif /linux/.match(RUBY_PLATFORM)
       ssc_path = "#{File.dirname(__FILE__)}/sam-sdk-2017-1-17-r1/linux64/ssc.so"
     end
-    
+
     if ssc_path.nil?
       puts "Platform not supported: #{RUBY_PLATFORM}"
     elsif !File.exist? ssc_path
@@ -92,8 +92,8 @@ module SscApi
     attach_function :ssc_module_exec_with_handler, [ :pointer, :pointer, callback([ :pointer, :pointer, :int, :float, :float, :string, :string, :pointer ], :pointer), :pointer ], :int
     attach_function :ssc_module_log, [ :pointer, :int, :pointer, :pointer ], :string
     attach_function :__ssc_segfault, [  ], :void
-    
+
   end
-  
+
 end
-    
+
